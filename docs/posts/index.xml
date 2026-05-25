@@ -2,17 +2,17 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">
   <channel>
     <title>Posts on </title>
-    <link>/posts/</link>
+    <link>https://rainbain.github.io/rainbain-blog/posts/</link>
     <description>Recent content in Posts on </description>
     <generator>Hugo</generator>
     <language>en-us</language>
     <lastBuildDate>Sun, 24 May 2026 00:00:00 +0000</lastBuildDate>
-    <atom:link href="/posts/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="https://rainbain.github.io/rainbain-blog/posts/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>DIY OCXO</title>
-      <link>/posts/diy-ocxo/</link>
+      <link>https://rainbain.github.io/rainbain-blog/posts/diy-ocxo/</link>
       <pubDate>Sun, 24 May 2026 00:00:00 +0000</pubDate>
-      <guid>/posts/diy-ocxo/</guid>
+      <guid>https://rainbain.github.io/rainbain-blog/posts/diy-ocxo/</guid>
       <description>&lt;h2 id=&#34;introduction&#34;&gt;Introduction&lt;/h2&gt;
 &lt;p&gt;I came into the office on a 3 day weekend to mess around with some hobby projects today.
 But then I realized, I could work on the usual, but, crystal oscillators sure are cool, so for no real reason, I decided to make my own OCXO.&lt;/p&gt;
@@ -21,9 +21,9 @@ But then I realized, I could work on the usual, but, crystal oscillators sure ar
     </item>
     <item>
       <title>First Post</title>
-      <link>/posts/first-post/first-post/</link>
+      <link>https://rainbain.github.io/rainbain-blog/posts/first-post/first-post/</link>
       <pubDate>Sat, 23 May 2026 00:00:00 +0000</pubDate>
-      <guid>/posts/first-post/first-post/</guid>
+      <guid>https://rainbain.github.io/rainbain-blog/posts/first-post/first-post/</guid>
       <description>&lt;p&gt;Hello, welcome to my blog!&lt;/p&gt;
 &lt;p&gt;I am an electrical engineer and embedded systems engineer from Florida. I started this blog because despite my 6-7 years of experience, I don&amp;rsquo;t have much of a portfolio to look back on. My professional work has always been deep under NDAs and a lot of my personal projects have been undocumented one off learning experiences.&lt;/p&gt;
 &lt;p&gt;I want to change that, and share both my one off projects, and parts of my more long term personal projects.&lt;/p&gt;</description>

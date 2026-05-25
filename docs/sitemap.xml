@@ -2,20 +2,20 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
   xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
-    <loc>/</loc>
+    <loc>https://rainbain.github.io/rainbain-blog/</loc>
     <lastmod>2026-05-24T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>/posts/diy-ocxo/</loc>
+    <loc>https://rainbain.github.io/rainbain-blog/posts/diy-ocxo/</loc>
     <lastmod>2026-05-24T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>/posts/</loc>
+    <loc>https://rainbain.github.io/rainbain-blog/posts/</loc>
     <lastmod>2026-05-24T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>/posts/first-post/first-post/</loc>
+    <loc>https://rainbain.github.io/rainbain-blog/posts/first-post/first-post/</loc>
     <lastmod>2026-05-23T00:00:00+00:00</lastmod>
   </url><url>
-    <loc>/categories/</loc>
+    <loc>https://rainbain.github.io/rainbain-blog/categories/</loc>
   </url><url>
-    <loc>/tags/</loc>
+    <loc>https://rainbain.github.io/rainbain-blog/tags/</loc>
   </url>
 </urlset>

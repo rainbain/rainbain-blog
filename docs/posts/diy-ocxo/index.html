@@ -13,16 +13,16 @@ But then I realized, I could work on the usual, but, crystal oscillators sure ar
 Why I love Clocks
 As a lover of radio communications and digital logic, timing circuits are one of my favorite bits of technology. There is something spiritual about clocks. The idea, that a device, ticking every second, using modern technology, can tick no more than 1 extra time a year. It has no concept of time relative to other clocks, but can keep it so accurately, that it seems like the whole world is in sync.">
 <meta name="author" content="Rainbain Blog">
-<link rel="canonical" href="/posts/diy-ocxo/">
-<link crossorigin="anonymous" href="/assets/css/stylesheet.6ff46447b1fa3f8a5cc0bcae48088decc3ae37f5fbc99406a3aefc3bf0e6044a.css" integrity="sha256-b/RkR7H6P4pcwLyuSAiN7MOuN/X7yZQGo678O/DmBEo=" rel="preload stylesheet" as="style">
-<link rel="icon" href="/favicon.ico">
-<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
-<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-<link rel="apple-touch-icon" href="/apple-touch-icon.png">
-<link rel="mask-icon" href="/safari-pinned-tab.svg">
+<link rel="canonical" href="https://rainbain.github.io/rainbain-blog/posts/diy-ocxo/">
+<link crossorigin="anonymous" href="/rainbain-blog/assets/css/stylesheet.6ff46447b1fa3f8a5cc0bcae48088decc3ae37f5fbc99406a3aefc3bf0e6044a.css" integrity="sha256-b/RkR7H6P4pcwLyuSAiN7MOuN/X7yZQGo678O/DmBEo=" rel="preload stylesheet" as="style">
+<link rel="icon" href="https://rainbain.github.io/rainbain-blog/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://rainbain.github.io/rainbain-blog/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://rainbain.github.io/rainbain-blog/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://rainbain.github.io/rainbain-blog/apple-touch-icon.png">
+<link rel="mask-icon" href="https://rainbain.github.io/rainbain-blog/safari-pinned-tab.svg">
 <meta name="theme-color" content="#2e2e33">
 <meta name="msapplication-TileColor" content="#2e2e33">
-<link rel="alternate" hreflang="en" href="/posts/diy-ocxo/">
+<link rel="alternate" hreflang="en" href="https://rainbain.github.io/rainbain-blog/posts/diy-ocxo/">
 <noscript>
     <style>
         #theme-toggle,
@@ -37,7 +37,7 @@ As a lover of radio communications and digital logic, timing circuits are one of
         document.querySelector("html").dataset.theme = 'light';
     }
 
-</script><meta property="og:url" content="/posts/diy-ocxo/">
+</script><meta property="og:url" content="https://rainbain.github.io/rainbain-blog/posts/diy-ocxo/">
   <meta property="og:title" content="DIY OCXO">
   <meta property="og:description" content="Introduction I came into the office on a 3 day weekend to mess around with some hobby projects today. But then I realized, I could work on the usual, but, crystal oscillators sure are cool, so for no real reason, I decided to make my own OCXO.
 Why I love Clocks As a lover of radio communications and digital logic, timing circuits are one of my favorite bits of technology. There is something spiritual about clocks. The idea, that a device, ticking every second, using modern technology, can tick no more than 1 extra time a year. It has no concept of time relative to other clocks, but can keep it so accurately, that it seems like the whole world is in sync.">
@@ -62,13 +62,13 @@ Why I love Clocks As a lover of radio communications and digital logic, timing c
       "@type": "ListItem",
       "position":  1 ,
       "name": "Posts",
-      "item": "/posts/"
-    }
+      "item": "https://rainbain.github.io/rainbain-blog/posts/"
+    }, 
     {
       "@type": "ListItem",
-      "position":  1 ,
+      "position":  2 ,
       "name": "DIY OCXO",
-      "item": "/posts/diy-ocxo/"
+      "item": "https://rainbain.github.io/rainbain-blog/posts/diy-ocxo/"
     }
   ]
 }
@@ -94,14 +94,14 @@ Why I love Clocks As a lover of radio communications and digital logic, timing c
   },
   "mainEntityOfPage": {
     "@type": "WebPage",
-    "@id": "/posts/diy-ocxo/"
+    "@id": "https://rainbain.github.io/rainbain-blog/posts/diy-ocxo/"
   },
   "publisher": {
     "@type": "Organization",
     "name": "",
     "logo": {
       "@type": "ImageObject",
-      "url": "/favicon.ico"
+      "url": "https://rainbain.github.io/rainbain-blog/favicon.ico"
     }
   }
 }
@@ -136,12 +136,12 @@ Why I love Clocks As a lover of radio communications and digital logic, timing c
         </div>
         <ul id="menu" class="menu">
             <li>
-                <a href="/posts/" title="Posts">
+                <a href="https://rainbain.github.io/rainbain-blog/posts/" title="Posts">
                     <span>Posts</span>
                 </a>
             </li>
             <li>
-                <a href="/tags/" title="Tags">
+                <a href="https://rainbain.github.io/rainbain-blog/tags/" title="Tags">
                     <span>Tags</span>
                 </a>
             </li>
@@ -182,9 +182,9 @@ But then I realized, I could work on the usual, but, crystal oscillators sure ar
 <p>I started with a 32.768 KHz crystal I found floating around in a random box. I don&rsquo;t know who made it, or how good it is. I would guess its probably rated for like 100-200 ppm just based on how it performed initially.</p>
 <p>What we will use to drive the crystal is a <a href="https://en.wikipedia.org/wiki/Pierce_oscillator">Pierce Oscillator</a>. This uses an inverter to drive the crystal out of phase and resonate. There is a bit more into equivalent circuits to crystals and their electrical parameters that I am skipping over here, but basically the crystal acts like a series LC tank, and if you do an upside down hand stand, it looks like a <a href="https://en.wikipedia.org/wiki/Colpitts_oscillator">Colpitts Oscillator</a></p>
 <p>I made one using MCP6002 OpAmp. This is an inverting amplifier, so since were not in a split rail configuration, I have DC biased the non-inverting input. The 10Meg resistor helps it get oscillating and helps for the OpAmp to not start in some wild open loop setup. If you have seen the uninstalled resistor across crystals in development boards, this is why.
-<img alt="Pierce Oscillator Using OpAmp" loading="lazy" src="/posts/diy-ocxo/pierce-sch.png"></p>
+<img alt="Pierce Oscillator Using OpAmp" loading="lazy" src="/rainbain-blog/posts/diy-ocxo/pierce-sch.png"></p>
 <p>Here it is built on a breadboard.
-<img alt="Pierce Oscillator On Breadboard" loading="lazy" src="/posts/diy-ocxo/pierce-irl.png"></p>
+<img alt="Pierce Oscillator On Breadboard" loading="lazy" src="/rainbain-blog/posts/diy-ocxo/pierce-irl.png"></p>
 <p>Here is a video of it operating. In the video, I actually touch it with my hands to offset the frequency. I am measuring the frequency by looking at the beat frequency by our oscillator frequency in yellow, and our waveform generator in green. The oscillator was 2.2 Hz off, I tuned the frequency generator to this frequency for the hand warming demo, so we do not see that 2.2 Hz beat frequency here.
 
 <video src="pierce-video.mp4" controls muted></video>
@@ -198,10 +198,10 @@ But then I realized, I could work on the usual, but, crystal oscillators sure ar
 <p>We will want to add a heating element and temperature sensor to our crystal.</p>
 <p>For this I will use a 10 ohm resistor as the heater. At our 5V rail that can give us at most 2.5W of heat. A 1N4148 diode as a temperature sensor. It will experience roughly 20mV change in the junction voltage drop per degree C. This is all thermally coupled together with our crystal using some copper tape.</p>
 <p>In the photos I used a 100 ohm resistor. I changed this out for 10 ohms since the MCP6002 takes up to 5V only, and the 100 ohm resistor can not supply enough heat at that temperature.</p>
-<p><img alt="Core Parts" loading="lazy" src="/posts/diy-ocxo/core1.png"></p>
-<p><img alt="Core Assembled" loading="lazy" src="/posts/diy-ocxo/core2.png"></p>
+<p><img alt="Core Parts" loading="lazy" src="/rainbain-blog/posts/diy-ocxo/core1.png"></p>
+<p><img alt="Core Assembled" loading="lazy" src="/rainbain-blog/posts/diy-ocxo/core2.png"></p>
 <h3 id="the-electrical">The Electrical<a hidden class="anchor" aria-hidden="true" href="#the-electrical">#</a></h3>
-<p><img alt="On Breadboard" loading="lazy" src="/posts/diy-ocxo/proto-irl-2.png"></p>
+<p><img alt="On Breadboard" loading="lazy" src="/rainbain-blog/posts/diy-ocxo/proto-irl-2.png"></p>
 <p>This circuit I winged. I do not have an exact schematic for it. There are a few important design decisions though I made when figuring it out.</p>
 <h4 id="frequency-tuning">Frequency Tuning<a hidden class="anchor" aria-hidden="true" href="#frequency-tuning">#</a></h4>
 <p>Our initial frequency is 2.2Hz too low. Increasing the temperature of this crystal causing the frequency to go down. So we don&rsquo;t just need to correct for the 2.2Hz first, we need to go even a bit higher so that we can apply the heating.</p>
@@ -216,7 +216,7 @@ But then I realized, I could work on the usual, but, crystal oscillators sure ar
 <h3 id="results">Results<a hidden class="anchor" aria-hidden="true" href="#results">#</a></h3>
 <p>I adjusted the temperature until the frequency was right. Unlike last time, we&rsquo;re at the target frequency of 32.768 KHz.</p>
 <p>The heater comes on a lot when it first turns on, but stabilizes in a nice PWM once left on. We can see that PWM on this current graph.
-<img alt="Graph of Current" loading="lazy" src="/posts/diy-ocxo/current.jpg"></p>
+<img alt="Graph of Current" loading="lazy" src="/rainbain-blog/posts/diy-ocxo/current.jpg"></p>
 <p>The beat frequency this time is super low. Instead of a continuous drift to one direction, it seems to move around back and forth randomly. This is its stability being bad. Seems that turning off the oscilloscope, letting it cool down, and using it again, causes this to happen more. Sounds like were pressing up against the frequency stability of the oscilloscope now.</p>
 
 <video src="proto-irl.mp4" controls muted></video>
@@ -228,7 +228,7 @@ But then I realized, I could work on the usual, but, crystal oscillators sure ar
 <h2 id="ocxo-prototype-2">OCXO Prototype 2<a hidden class="anchor" aria-hidden="true" href="#ocxo-prototype-2">#</a></h2>
 <p>Now that I have a design, I wanted to go ahead and manufacture it so we can get some real data!</p>
 <h3 id="schematic">Schematic<a hidden class="anchor" aria-hidden="true" href="#schematic">#</a></h3>
-<p><img alt="Prototype Schematic" loading="lazy" src="/posts/diy-ocxo/ocxo-sch.png">
+<p><img alt="Prototype Schematic" loading="lazy" src="/rainbain-blog/posts/diy-ocxo/ocxo-sch.png">
 This schematic is mostly what was on the breadboard but with some extra filtering caps, and installed the trimmer outside of the board on a 5 pin connector.</p>
 <p>The PCB will ideally be somewhat thermally connected to the core for even more stability.
 I included calibration notes too for how I would like to ideally calibrate this design.</p>
@@ -240,11 +240,11 @@ I included calibration notes too for how I would like to ideally calibrate this 
 <p>This proved futile though. It seemed to be very dead, and would no longer resonate at all.</p>
 <p>At this point I changed out the watch crystal for a new one. It started working! I have never in my life seen a watch crystal just break, and I worry its probably due to abuse or the sonic cleaner. Hopefully this does not become a recurring issue. I will update this if it does.</p>
 <p>In the mean time, here is a picture of the inside, it is my assumption I probably broke the tuning fork when taking it out, not a result of its death, since both forks are broken off here.</p>
-<p><img alt="Disassembled Watch Crystal" loading="lazy" src="/posts/diy-ocxo/deadtune.jpg"></p>
+<p><img alt="Disassembled Watch Crystal" loading="lazy" src="/rainbain-blog/posts/diy-ocxo/deadtune.jpg"></p>
 <h3 id="finished-prototype">Finished Prototype<a hidden class="anchor" aria-hidden="true" href="#finished-prototype">#</a></h3>
 <p>Here is the final build. I cut a foam box for it as well.</p>
-<p><img alt="Prototype Assembled Exposed" loading="lazy" src="/posts/diy-ocxo/box0.jpg"></p>
-<p><img alt="Prototype Assembled" loading="lazy" src="/posts/diy-ocxo/box1.jpg"></p>
+<p><img alt="Prototype Assembled Exposed" loading="lazy" src="/rainbain-blog/posts/diy-ocxo/box0.jpg"></p>
+<p><img alt="Prototype Assembled" loading="lazy" src="/rainbain-blog/posts/diy-ocxo/box1.jpg"></p>
 <h3 id="results-1">Results<a hidden class="anchor" aria-hidden="true" href="#results-1">#</a></h3>
 <h4 id="accuracy">Accuracy<a hidden class="anchor" aria-hidden="true" href="#accuracy">#</a></h4>
 <p>After adjusting, I got an instantaneous accuracy of 100 ppb. Its not held this very well and drifted over the day to around 200-300 ppb.</p>
@@ -285,7 +285,7 @@ I included calibration notes too for how I would like to ideally calibrate this 
     <ul class="post-tags">
     </ul>
 <nav class="paginav">
-  <a class="next" href="/posts/first-post/first-post/">
+  <a class="next" href="https://rainbain.github.io/rainbain-blog/posts/first-post/first-post/">
     <span class="title">Next »</span>
     <span>First Post</span>
   </a>
@@ -296,7 +296,7 @@ I included calibration notes too for how I would like to ideally calibrate this 
     </main>
     
 <footer class="footer">
-        <span>&copy; 2026 <a href="/"></a></span> · 
+        <span>&copy; 2026 <a href="https://rainbain.github.io/rainbain-blog/"></a></span> · 
 
     
     

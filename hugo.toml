@@ -1,4 +1,4 @@
-baseURL = "/"
+baseURL = "https://rainbain.github.io/rainbain-blog/"
 languageCode = "en-us"
 theme = "PaperMod"
 
