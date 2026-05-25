@@ -1,0 +1,212 @@
+{
+  "main": {
+    "id": "696445e58f4e1106",
+    "type": "split",
+    "children": [
+      {
+        "id": "dfdff2bb5ca5900c",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "bd4c77aaa28393c7",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "content/posts/first-post/First Post.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "First Post"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "a08f8c6076a1fe7b",
+    "type": "split",
+    "children": [
+      {
+        "id": "1c1d39a26089f65f",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "cf3fe209e028a483",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical",
+                "autoReveal": false
+              },
+              "icon": "lucide-folder-closed",
+              "title": "Files"
+            }
+          },
+          {
+            "id": "d047f1692f43db8e",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-search",
+              "title": "Search"
+            }
+          },
+          {
+            "id": "9b0a9a3f9f376eaa",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {},
+              "icon": "lucide-bookmark",
+              "title": "Bookmarks"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "right": {
+    "id": "978cbee5a1fa240f",
+    "type": "split",
+    "children": [
+      {
+        "id": "75c580d96dc65770",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "cb0fd4f56112bd4a",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "content/posts/first-post/First Post.md",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-coming-in",
+              "title": "Backlinks for First Post"
+            }
+          },
+          {
+            "id": "524fc113fe5cc257",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "content/posts/first-post/First Post.md",
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-going-out",
+              "title": "Outgoing links from First Post"
+            }
+          },
+          {
+            "id": "183a595e15a333f7",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-tags",
+              "title": "Tags"
+            }
+          },
+          {
+            "id": "aa2ff24781dabbe5",
+            "type": "leaf",
+            "state": {
+              "type": "all-properties",
+              "state": {
+                "sortOrder": "frequency",
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-archive",
+              "title": "All properties"
+            }
+          },
+          {
+            "id": "6cc0768a4b2e1c22",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "content/posts/first-post/First Post.md",
+                "followCursor": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-list",
+              "title": "Outline of First Post"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:Open quick switcher": false,
+      "graph:Open graph view": false,
+      "canvas:Create new canvas": false,
+      "daily-notes:Open today's daily note": false,
+      "templates:Insert template": false,
+      "command-palette:Open command palette": false,
+      "bases:Create new base": false
+    }
+  },
+  "active": "bd4c77aaa28393c7",
+  "lastOpenFiles": [
+    "content/posts/diy-ocxo/index.md",
+    "content/posts/first-post/First Post.md",
+    "content/posts/diy-ocxo/box0.jpg",
+    "public/posts/first-post/first-post/index.html",
+    "public/posts/first-post/first-post",
+    "content/posts/first-post/Untitled 1.md",
+    "public/posts/first-post/untitled-1/index.html",
+    "public/posts/first-post/untitled-1",
+    "public/posts/first-post/untitled/index.html",
+    "public/posts/first-post/untitled",
+    "public/posts/first-post",
+    "content/posts/first-post",
+    "content/posts/diy-ocxo/proto-irl.mp4",
+    "public/posts/diy-ocxo/proto-irl-2.png",
+    "public/posts/diy-ocxo/Screenshot_20260524_014724.png",
+    "content/posts/diy-ocxo/proto-irl-2.png",
+    "content/posts/diy-ocxo/box1.jpg",
+    "content/posts/diy-ocxo/core1.png",
+    "content/posts/diy-ocxo/core2.png",
+    "content/posts/diy-ocxo/current.jpg",
+    "content/posts/diy-ocxo/deadtune.jpg",
+    "content/posts/diy-ocxo/heating_pulses.mp4",
+    "content/posts/diy-ocxo/ocxo-sch.png"
+  ]
+}
