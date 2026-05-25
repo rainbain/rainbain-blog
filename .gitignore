@@ -10,4 +10,5 @@ Thumbs.db
 # Editor
 .vscode/
 .idea/
+.obsidian/
 *.swp
