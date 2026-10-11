@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto" data-theme="dark">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>GPU Rasterizer Optimizations, Shared Exponents | </title>
+<meta name="keywords" content="">
+<meta name="description" content="GPU Rasterizer Optimizations, Shared Exponents
+![[thumbnail.png]]
+Project Context
+I have spent quite some time designing my own versions of GPUs and reverse engineering other GPU pipelines and hardware modules. Despite this, I have not yet posted on my GPU work here.
+I have been developing a small GPU, inspired by tile based deferred renderers small enough to fit on the ICE40UP5K FPGA inside the phone I made. Furthermore, after that, I am hoping to tape it out on waferspace.">
+<meta name="author" content="Rainbain Blog">
+<link rel="canonical" href="https://rainbain.github.io/rainbain-blog/posts/gpu_rasterizer_optimizations_shared_exponents/gpu_rasterizer_optimizations_shared_exponents/">
+<link crossorigin="anonymous" href="/rainbain-blog/assets/css/stylesheet.6ff46447b1fa3f8a5cc0bcae48088decc3ae37f5fbc99406a3aefc3bf0e6044a.css" integrity="sha256-b/RkR7H6P4pcwLyuSAiN7MOuN/X7yZQGo678O/DmBEo=" rel="preload stylesheet" as="style">
+<link rel="icon" href="https://rainbain.github.io/rainbain-blog/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://rainbain.github.io/rainbain-blog/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://rainbain.github.io/rainbain-blog/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://rainbain.github.io/rainbain-blog/apple-touch-icon.png">
+<link rel="mask-icon" href="https://rainbain.github.io/rainbain-blog/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="https://rainbain.github.io/rainbain-blog/posts/gpu_rasterizer_optimizations_shared_exponents/gpu_rasterizer_optimizations_shared_exponents/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+</noscript>
+<script>
+    if (localStorage.getItem("pref-theme") === "light") {
+        document.querySelector("html").dataset.theme = 'light';
+    }
+
+</script><meta property="og:url" content="https://rainbain.github.io/rainbain-blog/posts/gpu_rasterizer_optimizations_shared_exponents/gpu_rasterizer_optimizations_shared_exponents/">
+  <meta property="og:title" content="GPU Rasterizer Optimizations, Shared Exponents">
+  <meta property="og:description" content="GPU Rasterizer Optimizations, Shared Exponents ![[thumbnail.png]]
+Project Context I have spent quite some time designing my own versions of GPUs and reverse engineering other GPU pipelines and hardware modules. Despite this, I have not yet posted on my GPU work here.
+I have been developing a small GPU, inspired by tile based deferred renderers small enough to fit on the ICE40UP5K FPGA inside the phone I made. Furthermore, after that, I am hoping to tape it out on waferspace.">
+  <meta property="og:locale" content="en_us">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2026-10-11T00:00:00+00:00">
+    <meta property="article:modified_time" content="2026-10-11T00:00:00+00:00">
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="GPU Rasterizer Optimizations, Shared Exponents">
+  <meta name="twitter:description" content="GPU Rasterizer Optimizations, Shared Exponents ![[thumbnail.png]]
+Project Context I have spent quite some time designing my own versions of GPUs and reverse engineering other GPU pipelines and hardware modules. Despite this, I have not yet posted on my GPU work here.
+I have been developing a small GPU, inspired by tile based deferred renderers small enough to fit on the ICE40UP5K FPGA inside the phone I made. Furthermore, after that, I am hoping to tape it out on waferspace.">
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "Posts",
+      "item": "https://rainbain.github.io/rainbain-blog/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "GPU Rasterizer Optimizations, Shared Exponents",
+      "item": "https://rainbain.github.io/rainbain-blog/posts/gpu_rasterizer_optimizations_shared_exponents/gpu_rasterizer_optimizations_shared_exponents/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "GPU Rasterizer Optimizations, Shared Exponents",
+  "name": "GPU Rasterizer Optimizations, Shared Exponents",
+  "description": "GPU Rasterizer Optimizations, Shared Exponents ![[thumbnail.png]]\nProject Context I have spent quite some time designing my own versions of GPUs and reverse engineering other GPU pipelines and hardware modules. Despite this, I have not yet posted on my GPU work here.\nI have been developing a small GPU, inspired by tile based deferred renderers small enough to fit on the ICE40UP5K FPGA inside the phone I made. Furthermore, after that, I am hoping to tape it out on waferspace.\n",
+  "keywords": [
+    
+  ],
+  "articleBody": "GPU Rasterizer Optimizations, Shared Exponents ![[thumbnail.png]]\nProject Context I have spent quite some time designing my own versions of GPUs and reverse engineering other GPU pipelines and hardware modules. Despite this, I have not yet posted on my GPU work here.\nI have been developing a small GPU, inspired by tile based deferred renderers small enough to fit on the ICE40UP5K FPGA inside the phone I made. Furthermore, after that, I am hoping to tape it out on waferspace.\nDue to these constraints, the GPU has to be as small and simple as possible, while still being capable. So I have had to come up with all sorts of optimizations.\nAfter getting this optimization working on my own rasterizer, I wanted to bring it up as I often forget about using shared exponents. Hopefully I at some point can also write an introduction to rasterizers to better explain some of the core concepts and “whys” here, but for now this will serve as guidance to anyone possibly developing a GPU and as a strong example use case of where shared exponents can shine.\nThe Problem The fragments must interpolate vertex attributes using barycentric coordinates before using them. However, the rasterizer does not usually output barycentric coordinates directly. It instead outputs the 3 values of the edge function. Then it divides them by the triangle’s area. After this we get our standard 3 component vector with values ranging [0, 1] for how close each pixel is to each vertex of the triangle.\nThis division per pixel is pretty wasteful, so usually I will have the processor before the rasterizer include the reciprocal area so it can just carry out a multiplication and be done.\nBut the issue here is precision if you choose to use fixed point. Small fixed function GPUs, and especially those on an FPGA, can quickly get bloated with floating point normalization hardware. So it’s generally a good idea to try and avoid them for small low power GPUs.\nBut this multiplication, when represented as fixed point, is problematic. Assume a max framebuffer resolution of 640x480. The possible range of triangle areas, assuming they’re clipped at exactly the screen borders, is 153600 pixels.\nSo now, both the area and edge values have a range of 1-153600. Worse, if we choose to send a reciprocal area, we will ideally want a good few extra fractional bits so that small area triangles are not just divided by 1.\nSo we end up with what tends to become a 32x32 multiplication. But do we really need all that precision for our barycentric coords? If your GPU is like my small tile based system, texture resolution is so limited that you only need a Q0:8 output. So it would be ideal if we could just use an 8x8 multiplication in the fragments. This would make it possible for it to only ever use 1 fixed point format and remove a lot of complexities as it would be only using 1 format in its multipliers.\nAttempting to solve this problem has a lot of pitfalls that I will list at the end, and why I have found this solution to the problem to be the most painless.\nDeveloping the Solution There are some very important relationships between the edge functions and the triangle’s area:\nValue Ranges Since dividing the edge functions by the triangle area yields outputs ranged from [0, 1], we know that the range for the edge functions output must be [0, area].\nBarycentric Coords are a Directional Quantity Barycentric coords tell us where on the surface of the triangle we are. They are a direction, for where we are on the triangle.\nThis is very different from a position in the triangle per se. Although they’re not unit length, we generally care more about the “direction” the coordinates face in than their exact position.\nMeet Shared Exponent Floats Shared exponent floats fit the bill here really well. This is when a vector’s components all share the same exponent.\nThis works well on directional vectors since small offsets will be quantized to zero. You for example would not want to use this to represent the position of an object in a game world. It would lose precision on the X and Y axes as it ventured farther on the Z axis resulting in unintuitive loss in precision.\nBut for things like colors and rotations this is fine. We care more about the ratios between the values. For example modern GPUs let you use RGB9_E5. Where 3 color channels share the same exponent. Now you can store high dynamic range colors in only 32 bits instead of 96 bits, by sharing 1 exponent.\nApply to Rasterizer So we can see why we could express barycentric coordinates this way, but how does this help us?\nLet’s think about how we could turn that 32x32 multiplication into a 32x16 multiplication. We keep the value of the edge function as 32 bits. Well as a triangle gets big, the reciprocal area gets small. So we could switch between two exponent values. You do need to leave some overlap between the two sections, so that when you switch, you don’t suddenly drop a bunch of precision between the boundaries. That looks like this:\n// Saturated Q0:32 reciprocal uint64_t area_recip = (double)(0x100000000) / area; if(area_recip \u003e 0xFFFFFFFF) area_recip = 0xFFFFFFFF; int shift; uint16_t s_area_recip; if(area_recip \u003e 0x00FFFFFF) { // area \u003c 256 shift = 16; s_area_recip = area_recip \u003e\u003e 16; } else { // area \u003e= 256 shift = 8; s_area_recip = area_recip \u003e\u003e 8; } ... // Apply to Edge Function int32_t f_w0 = (w0 * s_area_recip) \u003c\u003c shift; // ~ (w0 / area) * 2^32 That works ok, but the precision is weirdly variable, and I’d like to do an 8x8 multiplication. So we can expand this.\nInstead of switching between two fixed point formats, I want to guarantee that after multiplying by the reciprocal area that the product is always the same format. That’s pretty easy actually.\nWe can just say that the reciprocal area is Q0:8 and the edge function is Q0:8, and the product will always be Q0:16. But how do we force these to the same format? Shared exponents!\nAnd here is the lovely thing, we already know the optimum exponent to use. The edge functions are ranged by the area. So the exponent should be large enough to fit the triangles area. So whatever 8 bit window we would use for the area, will be the same for the edge function.\nImplementation Priority Encoder First, let’s make some helper functions. I will call this, select the window and grab it, the priority encoder. Like a floating point normalization, it’s truncating the number and giving us an exponent.\n// Get the index of the first set most significant bit static int priority_bit(int32_t b) { for(int i = 31; i \u003e= 0; i--) { if(b \u0026 (1\u003c\u003ci)) return i; } return 0; } // Get an 8 bit window of that bit and the 7 bits following it static uint8_t priority_encode(int32_t in, int bit) { int shift = bit - 7; if(shift \u003e 0) { return in \u003e\u003e shift; } else { return in \u003c\u003c (-shift); } } Encoding the Area // Calculate area using edge function int area = dw1_dy * dw2_dx - dw1_dx * dw2_dy; // Flip triangles with negative area if (area \u003c 0) { area = -area; dw0_dx = -dw0_dx; dw0_dy = -dw0_dy; dw1_dx = -dw1_dx; dw1_dy = -dw1_dy; dw2_dx = -dw2_dx; dw2_dy = -dw2_dy; } // Exponent we will use for the edge values int area_exp = priority_bit(area); // Saturated Q0:32 reciprocal uint64_t area_recip = (double)(0x100000000) / area; if(area_recip \u003e 0x100000000) area_recip = 0x100000000; // Encode the reciprocal int recip_exp = priority_bit(area_recip); // 1 minus for an implied leading 1 removed for free extra precision uint8_t area_recip_enc = priority_encode(area_recip, recip_exp-1); Encoding Edge Values For what would be done by the rasterizer per pixel.\nuint8_t w0_enc = priority_encode(w0, area_exp); uint8_t w1_enc = priority_encode(w1, area_exp); uint8_t w2_enc = priority_encode(w2, area_exp); Generating Barycentrics And now for the multiplication the fragments would do to yield 3 barycentric coords.\n// Add w0_enc to account for the implied 1 in area_recip_enc. uint8_t b0 = ((w0_enc * area_recip_enc) \u003e\u003e 8) + w0_enc; uint8_t b1 = ((w1_enc * area_recip_enc) \u003e\u003e 8) + w1_enc; uint8_t b2 = ((w2_enc * area_recip_enc) \u003e\u003e 8) + w2_enc; Full Rasterizer + Colored Triangle // Get the index of the first set most significant bit static int priority_bit(int32_t b) { for(int i = 31; i \u003e= 0; i--) { if(b \u0026 (1\u003c\u003ci)) return i; } return 0; } // Get an 8 bit window of that bit and the 7 bits following it static uint8_t priority_encode(int32_t in, int bit) { int shift = bit - 7; if(shift \u003e 0) { return in \u003e\u003e shift; } else { return in \u003c\u003c (-shift); } } static uint16_t rgb565(uint8_t r, uint8_t g, uint8_t b) { return (uint16_t)(((r \u0026 0xF8) \u003c\u003c 8) | ((g \u0026 0xFC) \u003c\u003c 3) | (b \u003e\u003e 3)); } static void rasterize(uint16_t tile[TILE][TILE], int ax, int ay, int bx, int by, int cx, int cy) { // Compute bounding box by accumulating MIN/MAXes, clipped to the tile int16_t minx = MAX(MIN(MIN(ax, bx), cx), 0); int16_t miny = MAX(MIN(MIN(ay, by), cy), 0); int16_t maxx = MIN(MAX(MAX(ax, bx), cx), TILE - 1); int16_t maxy = MIN(MAX(MAX(ay, by), cy), TILE - 1); // Triangle doesn't touch this tile if (minx \u003e maxx || miny \u003e maxy) return; // w0 derivatives int16_t dw0_dx = cy - by; int16_t dw0_dy = bx - cx; // w1 derivatives int16_t dw1_dx = ay - cy; int16_t dw1_dy = cx - ax; // w2 derivatives int16_t dw2_dx = by - ay; int16_t dw2_dy = ax - bx; // Differences (evaluated at the clipped bbox corner, so the // incremental walk starts at the tile's first covered pixel) int16_t minx_ax = minx - ax; int16_t minx_bx = minx - bx; int16_t minx_cx = minx - cx; int16_t miny_ay = miny - ay; int16_t miny_by = miny - by; int16_t miny_cy = miny - cy; // Calculate area using edge function int area = dw1_dy * dw2_dx - dw1_dx * dw2_dy; if (area \u003c 0) { area = -area; dw0_dx = -dw0_dx; dw0_dy = -dw0_dy; dw1_dx = -dw1_dx; dw1_dy = -dw1_dy; dw2_dx = -dw2_dx; dw2_dy = -dw2_dy; } // Exponent we will use for the edge values int area_exp = priority_bit(area); // Saturated Q0:32 reciprocal uint64_t area_recip = (double)(0x100000000) / area; if(area_recip \u003e 0x100000000) area_recip = 0x100000000; // Encode the reciprocal int recip_exp = priority_bit(area_recip); // 1 minus for an implied leading 1 removed for free extra precision uint8_t area_recip_enc = priority_encode(area_recip, recip_exp-1); // Compute initial edge functions int32_t w0_i = minx_bx * dw0_dx + miny_by * dw0_dy; int32_t w1_i = minx_cx * dw1_dx + miny_cy * dw1_dy; int32_t w2_i = minx_ax * dw2_dx + miny_ay * dw2_dy; int32_t w0 = w0_i; int32_t w1 = w1_i; int32_t w2 = w2_i; for(int y = miny; y \u003c= maxy; y++) { w0 = w0_i; w1 = w1_i; w2 = w2_i; for(int x = minx; x \u003c= maxx; x++) { // If in triangle if((w0 \u003e= 0 \u0026\u0026 w1 \u003e= 0 \u0026\u0026 w2 \u003e= 0)) { uint8_t w0_enc = priority_encode(w0, area_exp); uint8_t w1_enc = priority_encode(w1, area_exp); uint8_t w2_enc = priority_encode(w2, area_exp); // Add w0_enc to account for the implied 1 in area_recip_enc. uint8_t b0 = ((w0_enc * area_recip_enc) \u003e\u003e 8) + w0_enc; uint8_t b1 = ((w1_enc * area_recip_enc) \u003e\u003e 8) + w1_enc; uint8_t b2 = ((w2_enc * area_recip_enc) \u003e\u003e 8) + w2_enc; tile[x][y] = rgb565(b0, b1, b2); } w0 += dw0_dx; w1 += dw1_dx; w2 += dw2_dx; } w0_i += dw0_dy; w1_i += dw1_dy; w2_i += dw2_dy; } } Results Results are good but not perfect.\nBig Triangles Big triangles come out perfect. ![[content/posts/gpu_rasterizer_optimizations_shared_exponents/big.png]]\nSmall Triangles These also come out very good. ![[content/posts/gpu_rasterizer_optimizations_shared_exponents/small.png]]\nWeird And Small Triangles But certain small triangles seem to throw it off. You can see by the darkening here there was a good bit of precision loss. It’s rather random when it does this. At Q0:8 I suspect there are cases where 1 bit of precision gets lost. A more reasonable Q0:16 would likely fix this. ![[content/posts/gpu_rasterizer_optimizations_shared_exponents/weird.png]]\nSkinny Triangles All good! ![[skinny.png]]\nTexturing Demo ![[texturing.png]] For the most part good. We can see the Q0:8 format and my texture sampler don’t get along fully right now in the software renderer though as evidenced by seam bleeding. But this is commonplace for low precision UVs.\nCommon Pitfalls Now I will list the pitfalls I fell into before finding this solution to help some developers maybe avoid them. They may have their own tricks to overcome that I have not found.\nNormalize the Edge Functions First You can modify the deltas such that the produced edge values always make the output fixed point format we want. I mainly avoided this because it caused holes in models. The deltas measured by pixels avoided a lot of rounding errors. Without it, I’d often get the vertices of the triangle wiggling around.\nIt also made those delta values big precision, as for small triangles it’s a big value, and for big ones it’s a small value. That resulted in big 32+32 adders, and big 32x32 multipliers in my vertex setup hardware I did not like.\nAdd a Separate Barycentric Coord Function. Like we have the deltas for edge functions, you could add a normalized delta for Barycentric Coords. It suffers from the first issue in terms of requiring a lot more setup, and a lot more data sent to the rasterizer per triangle.\nI am operating a deferred tile based renderer, so it’s best to minimize triangle bandwidth at this stage so I also avoided this solution.\nWith that many counters it’s also just lighter to do the whole shared exponent trick.\nConclusion I am very happy with this outcome and will likely continue to use it on my future GPUs. It means the fragments can pretty much just use the Barycentric Coords as is, and if you ever decided to move to floats, the conversion is pretty much free! All while the rasterizer is fast and simple.\nI have probably spent a month trying to optimize my rasterizer in weird ways, and have been so happy to find this elegant solution.\n",
+  "wordCount" : "2387",
+  "inLanguage": "en",
+  "datePublished": "2026-10-11T00:00:00Z",
+  "dateModified": "2026-10-11T00:00:00Z",
+  "author":{
+    "@type": "Person",
+    "name": "Rainbain Blog"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://rainbain.github.io/rainbain-blog/posts/gpu_rasterizer_optimizations_shared_exponents/gpu_rasterizer_optimizations_shared_exponents/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://rainbain.github.io/rainbain-blog/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+<body id="top">
+    <header class="header">
+    <nav class="header-nav">
+        <div class="logo">
+            <div class="logo-switches">
+                <button id="theme-toggle" class="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
+                    <svg class="moon" xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg class="sun" xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu" class="menu">
+            <li>
+                <a href="https://rainbain.github.io/rainbain-blog/posts/" title="Posts">
+                    <span>Posts</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://rainbain.github.io/rainbain-blog/tags/" title="Tags">
+                    <span>Tags</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    
+    <h1 class="post-title entry-hint-parent">
+      GPU Rasterizer Optimizations, Shared Exponents
+    </h1>
+    <div class="post-meta">
+
+<span title='2026-10-11 00:00:00 +0000 UTC'>October 11, 2026</span>&nbsp;·&nbsp;<span>12 min</span>&nbsp;·&nbsp;<span>Rainbain Blog</span>
+
+</div>
+  </header> 
+  <div class="post-content md-content"><h1 id="gpu-rasterizer-optimizations-shared-exponents">GPU Rasterizer Optimizations, Shared Exponents<a hidden class="anchor" aria-hidden="true" href="#gpu-rasterizer-optimizations-shared-exponents">#</a></h1>
+<p>![[thumbnail.png]]</p>
+<h2 id="project-context">Project Context<a hidden class="anchor" aria-hidden="true" href="#project-context">#</a></h2>
+<p>I have spent quite some time designing my own versions of GPUs and reverse engineering other GPU pipelines and hardware modules. Despite this, I have not yet posted on my GPU work here.</p>
+<p>I have been developing a small GPU, inspired by tile based deferred renderers small enough to fit on the ICE40UP5K FPGA inside the phone I made. Furthermore, after that, I am hoping to tape it out on waferspace.</p>
+<p>Due to these constraints, the GPU has to be as small and simple as possible, while still being capable. So I have had to come up with all sorts of optimizations.</p>
+<p>After getting this optimization working on my own rasterizer, I wanted to bring it up as I often forget about using shared exponents. Hopefully I at some point can also write an introduction to rasterizers to better explain some of the core concepts and &ldquo;whys&rdquo; here, but for now this will serve as guidance to anyone possibly developing a GPU and as a strong example use case of where shared exponents can shine.</p>
+<h2 id="the-problem">The Problem<a hidden class="anchor" aria-hidden="true" href="#the-problem">#</a></h2>
+<p>The fragments must interpolate vertex attributes using barycentric coordinates before using them. However, the rasterizer does not usually output barycentric coordinates directly. It instead outputs the 3 values of the edge function. Then it divides them by the triangle&rsquo;s area. After this we get our standard 3 component vector with values ranging <code>[0, 1]</code> for how close each pixel is to each vertex of the triangle.</p>
+<p>This division per pixel is pretty wasteful, so usually I will have the processor before the rasterizer include the reciprocal area so it can just carry out a multiplication and be done.</p>
+<p>But the issue here is precision if you choose to use fixed point. Small fixed function GPUs, and especially those on an FPGA, can quickly get bloated with floating point normalization hardware. So it&rsquo;s generally a good idea to try and avoid them for small low power GPUs.</p>
+<p>But this multiplication, when represented as fixed point, is problematic. Assume a max framebuffer resolution of 640x480. The possible range of triangle areas, assuming they&rsquo;re clipped at exactly the screen borders, is <code>153600</code> pixels.</p>
+<p>So now, both the area and edge values have a range of <code>1-153600</code>. Worse, if we choose to send a reciprocal area, we will ideally want a good few extra fractional bits so that small area triangles are not just divided by <code>1</code>.</p>
+<p>So we end up with what tends to become a <code>32x32</code> multiplication. But do we really need all that precision for our barycentric coords? If your GPU is like my small tile based system, texture resolution is so limited that you only need a <code>Q0:8</code> output. So it would be ideal if we could just use an <code>8x8</code> multiplication in the fragments. This would make it possible for it to only ever use 1 fixed point format and remove a lot of complexities as it would be only using 1 format in its multipliers.</p>
+<p>Attempting to solve this problem has a lot of pitfalls that I will list at the end, and why I have found this solution to the problem to be the most painless.</p>
+<h2 id="developing-the-solution">Developing the Solution<a hidden class="anchor" aria-hidden="true" href="#developing-the-solution">#</a></h2>
+<p>There are some very important relationships between the edge functions and the triangle&rsquo;s area:</p>
+<h3 id="value-ranges">Value Ranges<a hidden class="anchor" aria-hidden="true" href="#value-ranges">#</a></h3>
+<p>Since dividing the edge functions by the triangle area yields outputs ranged from <code>[0, 1]</code>, we know that the range for the edge functions output must be <code>[0, area]</code>.</p>
+<h3 id="barycentric-coords-are-a-directional-quantity">Barycentric Coords are a Directional Quantity<a hidden class="anchor" aria-hidden="true" href="#barycentric-coords-are-a-directional-quantity">#</a></h3>
+<p>Barycentric coords tell us where on the surface of the triangle we are. They are a direction, for where we are on the triangle.</p>
+<p>This is very different from a position in the triangle per se. Although they&rsquo;re not unit length, we generally care more about the &ldquo;direction&rdquo; the coordinates face in than their exact position.</p>
+<h3 id="meet-shared-exponent-floats">Meet Shared Exponent Floats<a hidden class="anchor" aria-hidden="true" href="#meet-shared-exponent-floats">#</a></h3>
+<p>Shared exponent floats fit the bill here really well. This is when a vector&rsquo;s components all share the same exponent.</p>
+<p>This works well on directional vectors since small offsets will be quantized to zero. You for example would not want to use this to represent the position of an object in a game world. It would lose precision on the X and Y axes as it ventured farther on the Z axis resulting in unintuitive loss in precision.</p>
+<p>But for things like colors and rotations this is fine. We care more about the ratios between the values. For example modern GPUs let you use <code>RGB9_E5</code>. Where 3 color channels share the same exponent. Now you can store high dynamic range colors in only 32 bits instead of 96 bits, by sharing 1 exponent.</p>
+<h3 id="apply-to-rasterizer">Apply to Rasterizer<a hidden class="anchor" aria-hidden="true" href="#apply-to-rasterizer">#</a></h3>
+<p>So we can see why we could express barycentric coordinates this way, but how does this help us?</p>
+<p>Let&rsquo;s think about how we could turn that <code>32x32</code> multiplication into a <code>32x16</code> multiplication. We keep the value of the edge function as 32 bits. Well as a triangle gets big, the reciprocal area gets small. So we could switch between two exponent values. You do need to leave some overlap between the two sections, so that when you switch, you don&rsquo;t suddenly drop a bunch of precision between the boundaries. That looks like this:</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#75715e">// Saturated Q0:32 reciprocal
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">uint64_t</span> area_recip <span style="color:#f92672">=</span> (<span style="color:#66d9ef">double</span>)(<span style="color:#ae81ff">0x100000000</span>) <span style="color:#f92672">/</span> area;
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">if</span>(area_recip <span style="color:#f92672">&gt;</span> <span style="color:#ae81ff">0xFFFFFFFF</span>)
+</span></span><span style="display:flex;"><span>    area_recip <span style="color:#f92672">=</span> <span style="color:#ae81ff">0xFFFFFFFF</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">int</span> shift;
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">uint16_t</span> s_area_recip;
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">if</span>(area_recip <span style="color:#f92672">&gt;</span> <span style="color:#ae81ff">0x00FFFFFF</span>) {      <span style="color:#75715e">// area &lt; 256
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    shift <span style="color:#f92672">=</span> <span style="color:#ae81ff">16</span>;
+</span></span><span style="display:flex;"><span>    s_area_recip <span style="color:#f92672">=</span> area_recip <span style="color:#f92672">&gt;&gt;</span> <span style="color:#ae81ff">16</span>;
+</span></span><span style="display:flex;"><span>} <span style="color:#66d9ef">else</span> {                           <span style="color:#75715e">// area &gt;= 256
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    shift <span style="color:#f92672">=</span> <span style="color:#ae81ff">8</span>;
+</span></span><span style="display:flex;"><span>    s_area_recip <span style="color:#f92672">=</span> area_recip <span style="color:#f92672">&gt;&gt;</span> <span style="color:#ae81ff">8</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>...
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Apply to Edge Function
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">int32_t</span> f_w0 <span style="color:#f92672">=</span> (w0 <span style="color:#f92672">*</span> s_area_recip) <span style="color:#f92672">&lt;&lt;</span> shift; <span style="color:#75715e">// ~ (w0 / area) * 2^32
+</span></span></span></code></pre></div><p>That works ok, but the precision is weirdly variable, and I&rsquo;d like to do an <code>8x8</code> multiplication. So we can expand this.</p>
+<p>Instead of switching between two fixed point formats, I want to guarantee that after multiplying by the reciprocal area that the product is always the same format. That&rsquo;s pretty easy actually.</p>
+<p>We can just say that the reciprocal area is <code>Q0:8</code> and the edge function is <code>Q0:8</code>, and the product will always be <code>Q0:16</code>. But how do we force these to the same format? Shared exponents!</p>
+<p>And here is the lovely thing, we already know the optimum exponent to use. The edge functions are ranged by the area. So the exponent should be large enough to fit the triangles area. So whatever 8 bit window we would use for the area, will be the same for the edge function.</p>
+<h3 id="implementation">Implementation<a hidden class="anchor" aria-hidden="true" href="#implementation">#</a></h3>
+<h4 id="priority-encoder">Priority Encoder<a hidden class="anchor" aria-hidden="true" href="#priority-encoder">#</a></h4>
+<p>First, let&rsquo;s make some helper functions. I will call this, select the window and grab it, the priority encoder. Like a floating point normalization, it&rsquo;s truncating the number and giving us an exponent.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#75715e">// Get the index of the first set most significant bit
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">static</span> <span style="color:#66d9ef">int</span> <span style="color:#a6e22e">priority_bit</span>(<span style="color:#66d9ef">int32_t</span> b) {
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">for</span>(<span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> <span style="color:#ae81ff">31</span>; i <span style="color:#f92672">&gt;=</span> <span style="color:#ae81ff">0</span>; i<span style="color:#f92672">--</span>) {
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">if</span>(b <span style="color:#f92672">&amp;</span> (<span style="color:#ae81ff">1</span><span style="color:#f92672">&lt;&lt;</span>i))
+</span></span><span style="display:flex;"><span>			<span style="color:#66d9ef">return</span> i;
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">return</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Get an 8 bit window of that bit and the 7 bits following it
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">static</span> <span style="color:#66d9ef">uint8_t</span> <span style="color:#a6e22e">priority_encode</span>(<span style="color:#66d9ef">int32_t</span> in, <span style="color:#66d9ef">int</span> bit) {
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">int</span> shift <span style="color:#f92672">=</span> bit <span style="color:#f92672">-</span> <span style="color:#ae81ff">7</span>;
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">if</span>(shift <span style="color:#f92672">&gt;</span> <span style="color:#ae81ff">0</span>) {
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">return</span> in <span style="color:#f92672">&gt;&gt;</span> shift;
+</span></span><span style="display:flex;"><span>	} <span style="color:#66d9ef">else</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">return</span> in <span style="color:#f92672">&lt;&lt;</span> (<span style="color:#f92672">-</span>shift);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h4 id="encoding-the-area">Encoding the Area<a hidden class="anchor" aria-hidden="true" href="#encoding-the-area">#</a></h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#75715e">// Calculate area using edge function
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">int</span> area <span style="color:#f92672">=</span> dw1_dy <span style="color:#f92672">*</span> dw2_dx <span style="color:#f92672">-</span> dw1_dx <span style="color:#f92672">*</span> dw2_dy;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Flip triangles with negative area
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">if</span> (area <span style="color:#f92672">&lt;</span> <span style="color:#ae81ff">0</span>) {
+</span></span><span style="display:flex;"><span>	area <span style="color:#f92672">=</span> <span style="color:#f92672">-</span>area;
+</span></span><span style="display:flex;"><span>	dw0_dx <span style="color:#f92672">=</span> <span style="color:#f92672">-</span>dw0_dx; dw0_dy <span style="color:#f92672">=</span> <span style="color:#f92672">-</span>dw0_dy;
+</span></span><span style="display:flex;"><span>	dw1_dx <span style="color:#f92672">=</span> <span style="color:#f92672">-</span>dw1_dx; dw1_dy <span style="color:#f92672">=</span> <span style="color:#f92672">-</span>dw1_dy;
+</span></span><span style="display:flex;"><span>	dw2_dx <span style="color:#f92672">=</span> <span style="color:#f92672">-</span>dw2_dx; dw2_dy <span style="color:#f92672">=</span> <span style="color:#f92672">-</span>dw2_dy;
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Exponent we will use for the edge values
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">int</span> area_exp <span style="color:#f92672">=</span> <span style="color:#a6e22e">priority_bit</span>(area);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Saturated Q0:32 reciprocal
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">uint64_t</span> area_recip <span style="color:#f92672">=</span> (<span style="color:#66d9ef">double</span>)(<span style="color:#ae81ff">0x100000000</span>) <span style="color:#f92672">/</span> area;
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">if</span>(area_recip <span style="color:#f92672">&gt;</span> <span style="color:#ae81ff">0x100000000</span>)
+</span></span><span style="display:flex;"><span>	area_recip <span style="color:#f92672">=</span> <span style="color:#ae81ff">0x100000000</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Encode the reciprocal
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">int</span> recip_exp <span style="color:#f92672">=</span> <span style="color:#a6e22e">priority_bit</span>(area_recip);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// 1 minus for an implied leading 1 removed for free extra precision
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">uint8_t</span> area_recip_enc <span style="color:#f92672">=</span> <span style="color:#a6e22e">priority_encode</span>(area_recip, recip_exp<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>);
+</span></span></code></pre></div><h4 id="encoding-edge-values">Encoding Edge Values<a hidden class="anchor" aria-hidden="true" href="#encoding-edge-values">#</a></h4>
+<p>For what would be done by the rasterizer per pixel.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#66d9ef">uint8_t</span> w0_enc <span style="color:#f92672">=</span> <span style="color:#a6e22e">priority_encode</span>(w0, area_exp);
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">uint8_t</span> w1_enc <span style="color:#f92672">=</span> <span style="color:#a6e22e">priority_encode</span>(w1, area_exp);
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">uint8_t</span> w2_enc <span style="color:#f92672">=</span> <span style="color:#a6e22e">priority_encode</span>(w2, area_exp);
+</span></span></code></pre></div><h4 id="generating-barycentrics">Generating Barycentrics<a hidden class="anchor" aria-hidden="true" href="#generating-barycentrics">#</a></h4>
+<p>And now for the multiplication the fragments would do to yield 3 barycentric coords.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#75715e">// Add w0_enc to account for the implied 1 in area_recip_enc.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">uint8_t</span> b0 <span style="color:#f92672">=</span> ((w0_enc <span style="color:#f92672">*</span> area_recip_enc) <span style="color:#f92672">&gt;&gt;</span> <span style="color:#ae81ff">8</span>) <span style="color:#f92672">+</span> w0_enc;
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">uint8_t</span> b1 <span style="color:#f92672">=</span> ((w1_enc <span style="color:#f92672">*</span> area_recip_enc) <span style="color:#f92672">&gt;&gt;</span> <span style="color:#ae81ff">8</span>) <span style="color:#f92672">+</span> w1_enc;
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">uint8_t</span> b2 <span style="color:#f92672">=</span> ((w2_enc <span style="color:#f92672">*</span> area_recip_enc) <span style="color:#f92672">&gt;&gt;</span> <span style="color:#ae81ff">8</span>) <span style="color:#f92672">+</span> w2_enc;
+</span></span></code></pre></div><h4 id="full-rasterizer--colored-triangle">Full Rasterizer + Colored Triangle<a hidden class="anchor" aria-hidden="true" href="#full-rasterizer--colored-triangle">#</a></h4>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#75715e">// Get the index of the first set most significant bit
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">static</span> <span style="color:#66d9ef">int</span> <span style="color:#a6e22e">priority_bit</span>(<span style="color:#66d9ef">int32_t</span> b) {
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">for</span>(<span style="color:#66d9ef">int</span> i <span style="color:#f92672">=</span> <span style="color:#ae81ff">31</span>; i <span style="color:#f92672">&gt;=</span> <span style="color:#ae81ff">0</span>; i<span style="color:#f92672">--</span>) {
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">if</span>(b <span style="color:#f92672">&amp;</span> (<span style="color:#ae81ff">1</span><span style="color:#f92672">&lt;&lt;</span>i))
+</span></span><span style="display:flex;"><span>			<span style="color:#66d9ef">return</span> i;
+</span></span><span style="display:flex;"><span>	}
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">return</span> <span style="color:#ae81ff">0</span>;
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  
+</span></span><span style="display:flex;"><span><span style="color:#75715e">// Get an 8 bit window of that bit and the 7 bits following it
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span><span style="color:#66d9ef">static</span> <span style="color:#66d9ef">uint8_t</span> <span style="color:#a6e22e">priority_encode</span>(<span style="color:#66d9ef">int32_t</span> in, <span style="color:#66d9ef">int</span> bit) {
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">int</span> shift <span style="color:#f92672">=</span> bit <span style="color:#f92672">-</span> <span style="color:#ae81ff">7</span>;
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">if</span>(shift <span style="color:#f92672">&gt;</span> <span style="color:#ae81ff">0</span>) {
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">return</span> in <span style="color:#f92672">&gt;&gt;</span> shift;
+</span></span><span style="display:flex;"><span>	} <span style="color:#66d9ef">else</span> {
+</span></span><span style="display:flex;"><span>		<span style="color:#66d9ef">return</span> in <span style="color:#f92672">&lt;&lt;</span> (<span style="color:#f92672">-</span>shift);
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">static</span> <span style="color:#66d9ef">uint16_t</span> <span style="color:#a6e22e">rgb565</span>(<span style="color:#66d9ef">uint8_t</span> r, <span style="color:#66d9ef">uint8_t</span> g, <span style="color:#66d9ef">uint8_t</span> b) {
+</span></span><span style="display:flex;"><span>	<span style="color:#66d9ef">return</span> (<span style="color:#66d9ef">uint16_t</span>)(((r <span style="color:#f92672">&amp;</span> <span style="color:#ae81ff">0xF8</span>) <span style="color:#f92672">&lt;&lt;</span> <span style="color:#ae81ff">8</span>) <span style="color:#f92672">|</span> ((g <span style="color:#f92672">&amp;</span> <span style="color:#ae81ff">0xFC</span>) <span style="color:#f92672">&lt;&lt;</span> <span style="color:#ae81ff">3</span>) <span style="color:#f92672">|</span> (b <span style="color:#f92672">&gt;&gt;</span> <span style="color:#ae81ff">3</span>));
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">static</span> <span style="color:#66d9ef">void</span> <span style="color:#a6e22e">rasterize</span>(<span style="color:#66d9ef">uint16_t</span> tile[TILE][TILE],
+</span></span><span style="display:flex;"><span>               <span style="color:#66d9ef">int</span> ax, <span style="color:#66d9ef">int</span> ay,
+</span></span><span style="display:flex;"><span>               <span style="color:#66d9ef">int</span> bx, <span style="color:#66d9ef">int</span> by,
+</span></span><span style="display:flex;"><span>               <span style="color:#66d9ef">int</span> cx, <span style="color:#66d9ef">int</span> cy) {
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Compute bounding box by accumulating MIN/MAXes, clipped to the tile
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#66d9ef">int16_t</span> minx <span style="color:#f92672">=</span> <span style="color:#a6e22e">MAX</span>(<span style="color:#a6e22e">MIN</span>(<span style="color:#a6e22e">MIN</span>(ax, bx), cx), <span style="color:#ae81ff">0</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int16_t</span> miny <span style="color:#f92672">=</span> <span style="color:#a6e22e">MAX</span>(<span style="color:#a6e22e">MIN</span>(<span style="color:#a6e22e">MIN</span>(ay, by), cy), <span style="color:#ae81ff">0</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int16_t</span> maxx <span style="color:#f92672">=</span> <span style="color:#a6e22e">MIN</span>(<span style="color:#a6e22e">MAX</span>(<span style="color:#a6e22e">MAX</span>(ax, bx), cx), TILE <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>);
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int16_t</span> maxy <span style="color:#f92672">=</span> <span style="color:#a6e22e">MIN</span>(<span style="color:#a6e22e">MAX</span>(<span style="color:#a6e22e">MAX</span>(ay, by), cy), TILE <span style="color:#f92672">-</span> <span style="color:#ae81ff">1</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Triangle doesn&#39;t touch this tile
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#66d9ef">if</span> (minx <span style="color:#f92672">&gt;</span> maxx <span style="color:#f92672">||</span> miny <span style="color:#f92672">&gt;</span> maxy)
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">return</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// w0 derivatives
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#66d9ef">int16_t</span> dw0_dx <span style="color:#f92672">=</span>  cy <span style="color:#f92672">-</span> by;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int16_t</span> dw0_dy <span style="color:#f92672">=</span>  bx <span style="color:#f92672">-</span> cx;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// w1 derivatives
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#66d9ef">int16_t</span> dw1_dx <span style="color:#f92672">=</span>  ay <span style="color:#f92672">-</span> cy;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int16_t</span> dw1_dy <span style="color:#f92672">=</span>  cx <span style="color:#f92672">-</span> ax;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// w2 derivatives
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#66d9ef">int16_t</span> dw2_dx <span style="color:#f92672">=</span>  by <span style="color:#f92672">-</span> ay;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int16_t</span> dw2_dy <span style="color:#f92672">=</span>  ax <span style="color:#f92672">-</span> bx;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Differences (evaluated at the clipped bbox corner, so the
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#75715e">// incremental walk starts at the tile&#39;s first covered pixel)
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#66d9ef">int16_t</span> minx_ax <span style="color:#f92672">=</span> minx <span style="color:#f92672">-</span> ax;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int16_t</span> minx_bx <span style="color:#f92672">=</span> minx <span style="color:#f92672">-</span> bx;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int16_t</span> minx_cx <span style="color:#f92672">=</span> minx <span style="color:#f92672">-</span> cx;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int16_t</span> miny_ay <span style="color:#f92672">=</span> miny <span style="color:#f92672">-</span> ay;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int16_t</span> miny_by <span style="color:#f92672">=</span> miny <span style="color:#f92672">-</span> by;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int16_t</span> miny_cy <span style="color:#f92672">=</span> miny <span style="color:#f92672">-</span> cy;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Calculate area using edge function
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#66d9ef">int</span> area <span style="color:#f92672">=</span> dw1_dy <span style="color:#f92672">*</span> dw2_dx <span style="color:#f92672">-</span> dw1_dx <span style="color:#f92672">*</span> dw2_dy;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span> (area <span style="color:#f92672">&lt;</span> <span style="color:#ae81ff">0</span>) {
+</span></span><span style="display:flex;"><span>        area   <span style="color:#f92672">=</span> <span style="color:#f92672">-</span>area;
+</span></span><span style="display:flex;"><span>        dw0_dx <span style="color:#f92672">=</span> <span style="color:#f92672">-</span>dw0_dx;  dw0_dy <span style="color:#f92672">=</span> <span style="color:#f92672">-</span>dw0_dy;
+</span></span><span style="display:flex;"><span>        dw1_dx <span style="color:#f92672">=</span> <span style="color:#f92672">-</span>dw1_dx;  dw1_dy <span style="color:#f92672">=</span> <span style="color:#f92672">-</span>dw1_dy;
+</span></span><span style="display:flex;"><span>        dw2_dx <span style="color:#f92672">=</span> <span style="color:#f92672">-</span>dw2_dx;  dw2_dy <span style="color:#f92672">=</span> <span style="color:#f92672">-</span>dw2_dy;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Exponent we will use for the edge values
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#66d9ef">int</span> area_exp <span style="color:#f92672">=</span> <span style="color:#a6e22e">priority_bit</span>(area);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Saturated Q0:32 reciprocal
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#66d9ef">uint64_t</span> area_recip <span style="color:#f92672">=</span> (<span style="color:#66d9ef">double</span>)(<span style="color:#ae81ff">0x100000000</span>) <span style="color:#f92672">/</span> area;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">if</span>(area_recip <span style="color:#f92672">&gt;</span> <span style="color:#ae81ff">0x100000000</span>)
+</span></span><span style="display:flex;"><span>        area_recip <span style="color:#f92672">=</span> <span style="color:#ae81ff">0x100000000</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Encode the reciprocal
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#66d9ef">int</span> recip_exp <span style="color:#f92672">=</span> <span style="color:#a6e22e">priority_bit</span>(area_recip);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// 1 minus for an implied leading 1 removed for free extra precision
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#66d9ef">uint8_t</span> area_recip_enc <span style="color:#f92672">=</span> <span style="color:#a6e22e">priority_encode</span>(area_recip, recip_exp<span style="color:#f92672">-</span><span style="color:#ae81ff">1</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    
+</span></span><span style="display:flex;"><span>    <span style="color:#75715e">// Compute initial edge functions
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>    <span style="color:#66d9ef">int32_t</span> w0_i <span style="color:#f92672">=</span> minx_bx <span style="color:#f92672">*</span> dw0_dx <span style="color:#f92672">+</span> miny_by <span style="color:#f92672">*</span> dw0_dy;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int32_t</span> w1_i <span style="color:#f92672">=</span> minx_cx <span style="color:#f92672">*</span> dw1_dx <span style="color:#f92672">+</span> miny_cy <span style="color:#f92672">*</span> dw1_dy;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int32_t</span> w2_i <span style="color:#f92672">=</span> minx_ax <span style="color:#f92672">*</span> dw2_dx <span style="color:#f92672">+</span> miny_ay <span style="color:#f92672">*</span> dw2_dy;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int32_t</span> w0 <span style="color:#f92672">=</span> w0_i;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int32_t</span> w1 <span style="color:#f92672">=</span> w1_i;
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">int32_t</span> w2 <span style="color:#f92672">=</span> w2_i;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>    <span style="color:#66d9ef">for</span>(<span style="color:#66d9ef">int</span> y <span style="color:#f92672">=</span> miny; y <span style="color:#f92672">&lt;=</span> maxy; y<span style="color:#f92672">++</span>) {
+</span></span><span style="display:flex;"><span>        w0 <span style="color:#f92672">=</span> w0_i;
+</span></span><span style="display:flex;"><span>        w1 <span style="color:#f92672">=</span> w1_i;
+</span></span><span style="display:flex;"><span>        w2 <span style="color:#f92672">=</span> w2_i;
+</span></span><span style="display:flex;"><span>        <span style="color:#66d9ef">for</span>(<span style="color:#66d9ef">int</span> x <span style="color:#f92672">=</span> minx; x <span style="color:#f92672">&lt;=</span> maxx; x<span style="color:#f92672">++</span>) {
+</span></span><span style="display:flex;"><span>            <span style="color:#75715e">// If in triangle
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>            <span style="color:#66d9ef">if</span>((w0 <span style="color:#f92672">&gt;=</span> <span style="color:#ae81ff">0</span> <span style="color:#f92672">&amp;&amp;</span> w1 <span style="color:#f92672">&gt;=</span> <span style="color:#ae81ff">0</span> <span style="color:#f92672">&amp;&amp;</span> w2 <span style="color:#f92672">&gt;=</span> <span style="color:#ae81ff">0</span>)) {
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">uint8_t</span> w0_enc <span style="color:#f92672">=</span> <span style="color:#a6e22e">priority_encode</span>(w0, area_exp);
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">uint8_t</span> w1_enc <span style="color:#f92672">=</span> <span style="color:#a6e22e">priority_encode</span>(w1, area_exp);
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">uint8_t</span> w2_enc <span style="color:#f92672">=</span> <span style="color:#a6e22e">priority_encode</span>(w2, area_exp);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>                <span style="color:#75715e">// Add w0_enc to account for the implied 1 in area_recip_enc.
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>                <span style="color:#66d9ef">uint8_t</span> b0 <span style="color:#f92672">=</span> ((w0_enc <span style="color:#f92672">*</span> area_recip_enc) <span style="color:#f92672">&gt;&gt;</span> <span style="color:#ae81ff">8</span>) <span style="color:#f92672">+</span> w0_enc;
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">uint8_t</span> b1 <span style="color:#f92672">=</span> ((w1_enc <span style="color:#f92672">*</span> area_recip_enc) <span style="color:#f92672">&gt;&gt;</span> <span style="color:#ae81ff">8</span>) <span style="color:#f92672">+</span> w1_enc;
+</span></span><span style="display:flex;"><span>                <span style="color:#66d9ef">uint8_t</span> b2 <span style="color:#f92672">=</span> ((w2_enc <span style="color:#f92672">*</span> area_recip_enc) <span style="color:#f92672">&gt;&gt;</span> <span style="color:#ae81ff">8</span>) <span style="color:#f92672">+</span> w2_enc;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>                tile[x][y] <span style="color:#f92672">=</span> <span style="color:#a6e22e">rgb565</span>(b0, b1, b2);
+</span></span><span style="display:flex;"><span>            }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>            w0 <span style="color:#f92672">+=</span> dw0_dx;
+</span></span><span style="display:flex;"><span>            w1 <span style="color:#f92672">+=</span> dw1_dx;
+</span></span><span style="display:flex;"><span>            w2 <span style="color:#f92672">+=</span> dw2_dx;
+</span></span><span style="display:flex;"><span>        }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>        w0_i <span style="color:#f92672">+=</span> dw0_dy;
+</span></span><span style="display:flex;"><span>        w1_i <span style="color:#f92672">+=</span> dw1_dy;
+</span></span><span style="display:flex;"><span>        w2_i <span style="color:#f92672">+=</span> dw2_dy;
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><h2 id="results">Results<a hidden class="anchor" aria-hidden="true" href="#results">#</a></h2>
+<p>Results are good but not perfect.</p>
+<h3 id="big-triangles">Big Triangles<a hidden class="anchor" aria-hidden="true" href="#big-triangles">#</a></h3>
+<p>Big triangles come out perfect.
+![[content/posts/gpu_rasterizer_optimizations_shared_exponents/big.png]]</p>
+<h3 id="small-triangles">Small Triangles<a hidden class="anchor" aria-hidden="true" href="#small-triangles">#</a></h3>
+<p>These also come out very good.
+![[content/posts/gpu_rasterizer_optimizations_shared_exponents/small.png]]</p>
+<h4 id="weird-and-small-triangles">Weird And Small Triangles<a hidden class="anchor" aria-hidden="true" href="#weird-and-small-triangles">#</a></h4>
+<p>But certain small triangles seem to throw it off. You can see by the darkening here there was a good bit of precision loss. It&rsquo;s rather random when it does this. At Q0:8 I suspect there are cases where 1 bit of precision gets lost. A more reasonable Q0:16 would likely fix this.
+![[content/posts/gpu_rasterizer_optimizations_shared_exponents/weird.png]]</p>
+<h3 id="skinny-triangles">Skinny Triangles<a hidden class="anchor" aria-hidden="true" href="#skinny-triangles">#</a></h3>
+<p>All good!
+![[skinny.png]]</p>
+<h3 id="texturing-demo">Texturing Demo<a hidden class="anchor" aria-hidden="true" href="#texturing-demo">#</a></h3>
+<p>![[texturing.png]]
+For the most part good. We can see the Q0:8 format and my texture sampler don&rsquo;t get along fully right now in the software renderer though as evidenced by seam bleeding. But this is commonplace for low precision UVs.</p>
+<h2 id="common-pitfalls">Common Pitfalls<a hidden class="anchor" aria-hidden="true" href="#common-pitfalls">#</a></h2>
+<p>Now I will list the pitfalls I fell into before finding this solution to help some developers maybe avoid them. They may have their own tricks to overcome that I have not found.</p>
+<h3 id="normalize-the-edge-functions-first">Normalize the Edge Functions First<a hidden class="anchor" aria-hidden="true" href="#normalize-the-edge-functions-first">#</a></h3>
+<p>You can modify the deltas such that the produced edge values always make the output fixed point format we want. I mainly avoided this because it caused holes in models. The deltas measured by pixels avoided a lot of rounding errors.
+Without it, I&rsquo;d often get the vertices of the triangle wiggling around.</p>
+<p>It also made those delta values big precision, as for small triangles it&rsquo;s a big value, and for big ones it&rsquo;s a small value. That resulted in big <code>32+32</code> adders, and big <code>32x32</code> multipliers in my vertex setup hardware I did not like.</p>
+<h3 id="add-a-separate-barycentric-coord-function">Add a Separate Barycentric Coord Function.<a hidden class="anchor" aria-hidden="true" href="#add-a-separate-barycentric-coord-function">#</a></h3>
+<p>Like we have the deltas for edge functions, you could add a normalized delta for Barycentric Coords. It suffers from the first issue in terms of requiring a lot more setup, and a lot more data sent to the rasterizer per triangle.</p>
+<p>I am operating a deferred tile based renderer, so it&rsquo;s best to minimize triangle bandwidth at this stage so I also avoided this solution.</p>
+<p>With that many counters it&rsquo;s also just lighter to do the whole shared exponent trick.</p>
+<h2 id="conclusion">Conclusion<a hidden class="anchor" aria-hidden="true" href="#conclusion">#</a></h2>
+<p>I am very happy with this outcome and will likely continue to use it on my future GPUs. It means the fragments can pretty much just use the Barycentric Coords as is, and if you ever decided to move to floats, the conversion is pretty much free! All while the rasterizer is fast and simple.</p>
+<p>I have probably spent a month trying to optimize my rasterizer in weird ways, and have been so happy to find this elegant solution.</p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+    </ul>
+<nav class="paginav">
+  <a class="next" href="https://rainbain.github.io/rainbain-blog/posts/guess-that-optimization-struct-initialization/">
+    <span class="title">Next »</span>
+    <span>GUESS THAT OPTIMIZATION</span>
+  </a>
+</nav>
+
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+        <span>&copy; 2026 <a href="https://rainbain.github.io/rainbain-blog/"></a></span> · 
+
+    
+    
+    <span>
+        Powered by
+        <a href="https://gohugo.io/?utm_source=papermod" rel="noopener" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" id="top-link" class="top-link hidden" aria-label="go to top" title="Go to Top (Alt + G)" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+        stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevrons-up">
+        <polyline points="17 11 12 6 7 11"></polyline>
+        <polyline points="17 18 12 13 7 18"></polyline>
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu');
+    if (menu) {
+        
+        const scrollPosition = localStorage.getItem("menu-scroll-position");
+        if (scrollPosition) {
+            menu.scrollLeft = parseInt(scrollPosition, 10);
+        }
+        
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var toplink = document.getElementById("top-link");
+    window.onscroll = function () {
+        const scrollThreshold = window.innerHeight;
+        if (document.body.scrollTop > scrollThreshold || document.documentElement.scrollTop > scrollThreshold) {
+            toplink.classList.remove("hidden");
+        } else {
+            toplink.classList.add("hidden");
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        const html = document.querySelector("html");
+        if (html.dataset.theme === "dark") {
+            html.dataset.theme = 'light';
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            html.dataset.theme = 'dark';
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>
