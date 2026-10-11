@@ -1,0 +1,1149 @@
+<!DOCTYPE html>
+<html lang="en" dir="auto" data-theme="dark">
+
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="robots" content="index, follow">
+<title>GUESS THAT OPTIMIZATION | </title>
+<meta name="keywords" content="">
+<meta name="description" content="Guess That Optimization, Struct Initialization
+
+It is legend that many hardware engineers working in low level languages like C optimize code more based on &ldquo;feeling&rdquo; and what they think the compiler will do. They write bad &ldquo;optimized&rdquo; code that&rsquo;s both harder to read and less efficient.
+As a hardware engineer myself with little experience as to how compilers actually work and 10&#43; years of experience coding in C, I fit the bill perfectly.">
+<meta name="author" content="Rainbain Blog">
+<link rel="canonical" href="https://rainbain.github.io/rainbain-blog/posts/guess-that-optimization-struct-initialization/">
+<link crossorigin="anonymous" href="/rainbain-blog/assets/css/stylesheet.6ff46447b1fa3f8a5cc0bcae48088decc3ae37f5fbc99406a3aefc3bf0e6044a.css" integrity="sha256-b/RkR7H6P4pcwLyuSAiN7MOuN/X7yZQGo678O/DmBEo=" rel="preload stylesheet" as="style">
+<link rel="icon" href="https://rainbain.github.io/rainbain-blog/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="https://rainbain.github.io/rainbain-blog/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="https://rainbain.github.io/rainbain-blog/favicon-32x32.png">
+<link rel="apple-touch-icon" href="https://rainbain.github.io/rainbain-blog/apple-touch-icon.png">
+<link rel="mask-icon" href="https://rainbain.github.io/rainbain-blog/safari-pinned-tab.svg">
+<meta name="theme-color" content="#2e2e33">
+<meta name="msapplication-TileColor" content="#2e2e33">
+<link rel="alternate" hreflang="en" href="https://rainbain.github.io/rainbain-blog/posts/guess-that-optimization-struct-initialization/">
+<noscript>
+    <style>
+        #theme-toggle,
+        .top-link {
+            display: none;
+        }
+
+    </style>
+</noscript>
+<script>
+    if (localStorage.getItem("pref-theme") === "light") {
+        document.querySelector("html").dataset.theme = 'light';
+    }
+
+</script><meta property="og:url" content="https://rainbain.github.io/rainbain-blog/posts/guess-that-optimization-struct-initialization/">
+  <meta property="og:title" content="GUESS THAT OPTIMIZATION">
+  <meta property="og:description" content="Guess That Optimization, Struct Initialization It is legend that many hardware engineers working in low level languages like C optimize code more based on “feeling” and what they think the compiler will do. They write bad “optimized” code that’s both harder to read and less efficient.
+As a hardware engineer myself with little experience as to how compilers actually work and 10&#43; years of experience coding in C, I fit the bill perfectly.">
+  <meta property="og:locale" content="en_us">
+  <meta property="og:type" content="article">
+    <meta property="article:section" content="posts">
+    <meta property="article:published_time" content="2026-06-09T00:00:00+00:00">
+    <meta property="article:modified_time" content="2026-06-09T00:00:00+00:00">
+
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="GUESS THAT OPTIMIZATION">
+  <meta name="twitter:description" content="Guess That Optimization, Struct Initialization It is legend that many hardware engineers working in low level languages like C optimize code more based on “feeling” and what they think the compiler will do. They write bad “optimized” code that’s both harder to read and less efficient.
+As a hardware engineer myself with little experience as to how compilers actually work and 10&#43; years of experience coding in C, I fit the bill perfectly.">
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position":  1 ,
+      "name": "Posts",
+      "item": "https://rainbain.github.io/rainbain-blog/posts/"
+    }, 
+    {
+      "@type": "ListItem",
+      "position":  2 ,
+      "name": "GUESS THAT OPTIMIZATION",
+      "item": "https://rainbain.github.io/rainbain-blog/posts/guess-that-optimization-struct-initialization/"
+    }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "GUESS THAT OPTIMIZATION",
+  "name": "GUESS THAT OPTIMIZATION",
+  "description": "Guess That Optimization, Struct Initialization It is legend that many hardware engineers working in low level languages like C optimize code more based on \u0026ldquo;feeling\u0026rdquo; and what they think the compiler will do. They write bad \u0026ldquo;optimized\u0026rdquo; code that\u0026rsquo;s both harder to read and less efficient.\nAs a hardware engineer myself with little experience as to how compilers actually work and 10+ years of experience coding in C, I fit the bill perfectly.\n",
+  "keywords": [
+    
+  ],
+  "articleBody": "Guess That Optimization, Struct Initialization It is legend that many hardware engineers working in low level languages like C optimize code more based on “feeling” and what they think the compiler will do. They write bad “optimized” code that’s both harder to read and less efficient.\nAs a hardware engineer myself with little experience as to how compilers actually work and 10+ years of experience coding in C, I fit the bill perfectly.\nWe will also play today’s game with two other contestants. A fellow C developer, and Claude.\nAll will be put to the test in today’s game of Guess That Optimization. Feel free to compete and follow along yourself.\nIntroduction To Why Though the beforehand legend may be overexaggerated, it’s not something I am new to, and I, and many others, have fallen victim to many times.\nI have come to avoid so many “anti-patterns”, bad coding practices, in C, that I really just imagined existing based on assumptions of how the compiler worked internally, and wrote C code to try and baby the compiler into generating clean assembly.\nAs time has gone on though, I have come to realize, my “babying” of the compiler was just confusing it, making my code harder to optimize, and all at the sacrifice of the reader. Maybe we just deep down think optimized code should look unreadable and hard to follow or something.\nEven then, after tonight’s game, I came to realize I was still dramatically wrong and should be much more humble about what the compiler will do.\nRules of the Game Tonight’s game will be run using 3 simple C (technically C++) functions to construct a struct. All C functions behave the same, but use slightly different methods. No fancy math, vectorization, or anything, we’re just copying some data. This should be easy, right?\nTwo compilers will compete tonight to optimize them. GCC 16.1.0 and Clang 22.1.0. Both of them will be compiling for RISC-V RV32GC instruction set architecture.\nI chose RISC-V because it’s an assembly language I know the best, and provides clean and simple assembly with hopefully fewer footguns.\nTonight’s game was made possible with Compiler Explorer, an interactive website to quickly view the assembly output of a compiler.\nThe Code We will be constructing a struct in each function. Each function will operate the same. The struct contains both text, and a 16 bit unsigned value.\n#include #include #include typedef struct { char name[16]; uint16_t number_of_cats; } super_cool_thing_t; super_cool_thing_t get_thing1(const char* name, bool i_like_dogs) { if(i_like_dogs) { return super_cool_thing_t { // The following appears to be a C++ thing: name: {'B', 'o', 'b', '\\0'}, number_of_cats: 1 }; } else { return super_cool_thing_t { name: {'T', 'i', 'm', '\\0'}, number_of_cats: 32 }; } } void get_thing2(super_cool_thing_t* r, const char* name, bool i_like_dogs) { memset(r, 0, sizeof(*r)); if(i_like_dogs) { r-\u003ename[0] = 'B'; r-\u003ename[1] = 'o'; r-\u003ename[2] = 'b'; r-\u003ename[3] = '\\0'; r-\u003enumber_of_cats = 1; } else { r-\u003ename[0] = 'T'; r-\u003ename[1] = 'i'; r-\u003ename[2] = 'm'; r-\u003ename[3] = '\\0'; r-\u003enumber_of_cats = 32; } } super_cool_thing_t get_thing3(const char* name, bool i_like_dogs) { super_cool_thing_t t = {0}; if (i_like_dogs) { strcpy(t.name, \"Bob\"); t.number_of_cats = 1; } else { strcpy(t.name, \"Tim\"); t.number_of_cats = 32; } return t; } Each function returns type super_cool_thing_t. If you like dogs, it puts in your name as Bob and ensures you only have 1 cat. If you don’t like dogs, it assumes you’re Tim, love cats, and gives you 32 cats to go along with it.\nget_thing1 This is the first method that comes to mind for me. I just return 1 of two structs depending on if you like dogs or not.\nIt’s worth noting the name: value only compiles if told to be treated as C++, not C. I included this, because I started doing it because of Rust and SystemVerilog. In both, I like it when setting up structs and ports respectively because it’s more clear to me what you’re setting.\nThis one is probably the most readable to me, except for my weird way of setting the strings.\nget_thing2 This was my attempt at an “optimized” version. Passing super_cool_thing_t* r as a pointer instead of just returning it is probably pointless here. If you don’t do that the compiler should just have the caller make space, and pass a pointer to it just like I did here manually.\nAnyhow, this to me is equivalent to get_thing1. I just distrusted the compiler and did it all manually.\nget_thing3 This one is a cross between get_thing1 and get_thing2.\nInstead of distrusting the compiler with return value optimizations (RVO), I just went ahead and returned the struct.\nBut instead of having two different struct initializations, I explicitly cleared it, then filled out the structs with strcpy.\nThe Contestants’ Answers Myself I thought get_thing2 would be the fastest, then get_thing1, and then get_thing3.\nMy reasoning was get_thing2 was the most direct in operation. It says, everything will be zeros. Then says what each byte should be. To me, that everything is pretty much known easily, just set up the data.\nget_thing1 should be no different to me. I have no reason to distrust RVO right?\nThen get_thing3 just seemed like the worst of both worlds. We’re trusting the compiler with RVO and inlining strcpy. So it just seems the most prone to issues.\nFellow C Developer (awewsomegamer) Awewsomegamer speculated get_thing1 would be the fastest. get_thing2 would come in second. And get_thing3 being prone to be the slowest.\nVery similar reasoning, get_thing1 was very upfront and direct with the compiler. Set up the caller’s call stack with this, that’s it, easy.\nThen get_thing2 was speculated to be the same, and should give if not the same output.\nSame story with get_thing3, it’s really just a more indirect version of the other two and we’re depending on strcpy to play nicely.\nClaude Claude rated them as follows. get_thing1 — likely slowest or middle get_thing2 — likely fastest get_thing3 — likely middle or slowest\nIt justified get_thing1 as slowest because it distrusted RVO. It stated that it would have to construct two super_cool_thing_t then likely memcpy the result.\nget_thing2 was seen as the fastest for the same reason. It thought the lack of hidden-pointer ABI overhead on the return value would make it “minimal, predictable, no copying.” It also noted the memset would likely be optimized out.\nget_thing3 it predicted to be the slowest. It noted the {0} zero-init is likely the same as memset, but noted that the strcpy would likely not be optimized out, and act as an unnecessary function call.\nRound 1, Clang The original function and the generated assembly are provided. I recommend reading through each to see how the compiler approached the problem.\nget_thing1 super_cool_thing_t get_thing1(const char* name, bool i_like_dogs) { if(i_like_dogs) { return super_cool_thing_t { name: {'B', 'o', 'b', '\\0'}, number_of_cats: 1 }; } else { return super_cool_thing_t { name: {'T', 'i', 'm', '\\0'}, number_of_cats: 32 }; } } get_thing1(char const*, bool): addi sp, sp, -16 sw ra, 12(sp) sw s0, 8(sp) sw s1, 4(sp) mv s0, a0 addi a0, a0, 3 bnez a2, .LBB0_2 li a1, 84 li a2, 105 li a3, 109 li s1, 32 j .LBB0_3 .LBB0_2: li a1, 66 li a2, 111 li a3, 98 li s1, 1 .LBB0_3: sb a1, 0(s0) sb a2, 1(s0) sb a3, 2(s0) li a2, 13 li a1, 0 call memset sh s1, 16(s0) lw ra, 12(sp) lw s0, 8(sp) lw s1, 4(sp) addi sp, sp, 16 ret This operation makes an entire stack frame, calls memset, and uses 23-24 instructions.\nClang’s choice to call memset is quite weird here, and we will have to investigate more later.\nClang chose to construct the string 1 byte at a time.\nget_thing2 void get_thing2(super_cool_thing_t* r, const char* name, bool i_like_dogs) { memset(r, 0, sizeof(*r)); if(i_like_dogs) { r-\u003ename[0] = 'B'; r-\u003ename[1] = 'o'; r-\u003ename[2] = 'b'; r-\u003ename[3] = '\\0'; r-\u003enumber_of_cats = 1; } else { r-\u003ename[0] = 'T'; r-\u003ename[1] = 'i'; r-\u003ename[2] = 'm'; r-\u003ename[3] = '\\0'; r-\u003enumber_of_cats = 32; } } get_thing2(super_cool_thing_t*, char const*, bool): sh zero, 12(a0) sh zero, 14(a0) sh zero, 4(a0) sh zero, 6(a0) sh zero, 8(a0) sh zero, 10(a0) beqz a2, .LBB1_2 li a1, 1 li a2, 98 li a3, 111 li a4, 66 sb a4, 0(a0) sb a3, 1(a0) sb a2, 2(a0) sb zero, 3(a0) sh a1, 16(a0) ret .LBB1_2: li a1, 32 li a2, 109 li a3, 105 li a4, 84 sb a4, 0(a0) sb a3, 1(a0) sb a2, 2(a0) sb zero, 3(a0) sh a1, 16(a0) ret This uses 18 instructions, and no stack frame due to no more memset calls.\nIt’s weird to see here our explicit memset got inlined, while Clang’s implicit memset did not. The ordering of the function too is quite different.\nClang chose to clear it two bytes at a time, construct the string one byte at a time, and in general is much nicer than the first.\nget_thing3 super_cool_thing_t get_thing3(const char* name, bool i_like_dogs) { super_cool_thing_t t = {0}; if (i_like_dogs) { strcpy(t.name, \"Bob\"); t.number_of_cats = 1; } else { strcpy(t.name, \"Tim\"); t.number_of_cats = 32; } return t; } get_thing3(char const*, bool): sh zero, 12(a0) sh zero, 14(a0) sh zero, 4(a0) sh zero, 6(a0) sh zero, 8(a0) sh zero, 10(a0) bnez a2, .LBB2_2 lui a2, 1751 addi a2, a2, -1708 li a1, 32 srli a3, a2, 16 sh a2, 0(a0) sh a3, 2(a0) sh a1, 16(a0) ret .LBB2_2: lui a2, 1575 addi a2, a2, -190 li a1, 1 srli a3, a2, 16 sh a2, 0(a0) sh a3, 2(a0) sh a1, 16(a0) ret This uses 16 instructions, and is the shortest so far.\nBoth the memset and both strcpys got inlined and resulted in an overall shorter output.\nClang both cleared it out two bytes at a time, and constructed the string two bytes at a time resulting in the shorter output.\nFor clang, get_thing3 has been the best, while it dropped the ball on get_thing1.\nRound 2, GCC get_thing1 super_cool_thing_t get_thing1(const char* name, bool i_like_dogs) { if(i_like_dogs) { return super_cool_thing_t { name: {'B', 'o', 'b', '\\0'}, number_of_cats: 1 }; } else { return super_cool_thing_t { name: {'T', 'i', 'm', '\\0'}, number_of_cats: 32 }; } } get_thing1(char const*, bool): li a5,28672 beq a2,zero,.L3 addi a5,a5,-190 li a3,98 li a4,1 .L2: sb zero,3(a0) sb zero,4(a0) sb zero,5(a0) sb zero,6(a0) sb zero,7(a0) sb zero,8(a0) sb zero,9(a0) sb zero,10(a0) sb zero,11(a0) sb zero,12(a0) sb zero,13(a0) sb zero,14(a0) sb zero,15(a0) sh a5,0(a0) sb a3,2(a0) sh a4,16(a0) ret .L3: addi a5,a5,-1708 li a3,109 li a4,32 j .L2 This uses 21-22 instructions and did not produce a whole stack frame with memset call like Clang.\nGCC produced a much cleaner output than Clang here. It chose to clear it out and construct the string 1 byte at a time.\nget_thing2 void get_thing2(super_cool_thing_t* r, const char* name, bool i_like_dogs) { memset(r, 0, sizeof(*r)); if(i_like_dogs) { r-\u003ename[0] = 'B'; r-\u003ename[1] = 'o'; r-\u003ename[2] = 'b'; r-\u003ename[3] = '\\0'; r-\u003enumber_of_cats = 1; } else { r-\u003ename[0] = 'T'; r-\u003ename[1] = 'i'; r-\u003ename[2] = 'm'; r-\u003ename[3] = '\\0'; r-\u003enumber_of_cats = 32; } } get_thing2(super_cool_thing_t*, char const*, bool): sb zero,3(a0) sb zero,4(a0) sb zero,5(a0) sb zero,6(a0) sb zero,7(a0) sb zero,8(a0) sb zero,9(a0) sb zero,10(a0) sb zero,11(a0) sb zero,12(a0) sb zero,13(a0) sb zero,14(a0) sb zero,15(a0) sb zero,16(a0) sb zero,17(a0) li a5,28672 beq a2,zero,.L7 addi a5,a5,-190 li a3,98 li a4,1 sh a5,0(a0) sb a3,2(a0) sh a4,16(a0) ret .L7: addi a5,a5,-1708 li a3,109 li a4,32 sh a5,0(a0) sb a3,2(a0) sh a4,16(a0) ret This uses 23 instructions and operates about the same as get_thing1 when compiled with GCC.\nThis output is similar to what Clang produced, but with more instructions.\nget_thing3 super_cool_thing_t get_thing3(const char* name, bool i_like_dogs) { super_cool_thing_t t = {0}; if (i_like_dogs) { strcpy(t.name, \"Bob\"); t.number_of_cats = 1; } else { strcpy(t.name, \"Tim\"); t.number_of_cats = 32; } return t; } get_thing3(char const*, bool): sh zero,0(a0) sh zero,2(a0) sh zero,4(a0) sh zero,6(a0) sh zero,8(a0) sh zero,10(a0) sh zero,12(a0) sh zero,14(a0) sh zero,16(a0) li a5,28672 beq a2,zero,.L9 addi a5,a5,-190 li a4,98 sh a5,0(a0) li a5,1 sh a4,2(a0) sh a5,16(a0) ret .L9: addi a5,a5,-1708 li a4,109 sh a5,0(a0) li a5,32 sh a4,2(a0) sh a5,16(a0) ret This uses 18 instructions, unlike the Clang version, it zeros it out just before overwriting it, leading to fewer instructions, but in general they are very similar.\nHere it chose to do everything two bytes at a time just like Clang.\nResults Version Compiler Instructions Stack Frame memset call Zero strategy String strategy get_thing1 Clang 23–24 + memset Yes Yes — 1 byte at a time get_thing2 Clang 18 No No (inlined) 2 bytes at a time 1 byte at a time get_thing3 Clang 16 No No (inlined) 2 bytes at a time 2 bytes at a time get_thing1 GCC 21–22 No No 1 byte at a time 1 byte at a time get_thing2 GCC 23 No No (inlined) 1 byte at a time 2 bytes at a time get_thing3 GCC 18 No No (inlined) 2 bytes at a time 2 bytes at a time None of the three contestants were correct!\nEven without direct performance metrics here, get_thing3 seems pretty undoubtedly superior to the others.\nOn both compilers, it was the only version that both efficiently zeroed the struct and the string.\nWe also saw no issue with RVO, or inlining. Our explicit memsets and memcpys were always inlined, with the only failure occurring on the memset Clang added itself.\nIn general this is a big win for compiler optimizations. This does not leave the results without optimization though, like instead of zeroing the struct two bytes at a time, you could have used sw to zero them four bytes at a time. C/C++ as far as I know guarantees structs to be 4 byte aligned. I am not sure why both GCC and Clang avoided this optimization.\nWe also did not look into the branch optimizations in these functions. Speculative execution may prefer some of these implementations over some of the others; these optimizations would be best explored with actual performance testing on a chosen target platform.\nWhat can be learned Well I guess so. I think the lesson here is twofold. Avoid making micro-optimizations about what you think the compiler will do. When you do need to optimize, closely follow the actual compiler output and test on real hardware as opposed to playing a guessing game.\nFrom this experience in isolation, it also appears the compiler benefits from you being direct with what you want to do, not from babying each operation required to do it.\nAbout That Weird Memset If you’re like me, you’re wondering what had to go wrong inside of Clang to lead to that weird memset in get_thing1? Why would Clang add its own fixed memset, and then fail to inline it?\nWell I reached out to the LLVM community, and I will do my best to interpret what exactly happened here.\nThe first thing they noted is that at some point the compiler will see too many zero sets, so instead of inlining it, it will just call memset, but why here, it’s only clearing 13 bytes?\nWell as a test, apparently you can have it clear 12 bytes, instead of 13, and the issue goes away.\nsuper_cool_thing_t get_thing1(const char* name, bool i_like_dogs) { if(i_like_dogs) { return super_cool_thing_t { name: {'B', 'o', 'b', 'y', '\\0'}, number_of_cats: 1 }; } else { return super_cool_thing_t { name: {'T', 'i', 'm', 'y', '\\0'}, number_of_cats: 32 }; } } get_thing1(char const*, bool): bnez a2, .LBB0_2 li a2, 84 li a3, 105 li a4, 109 li a1, 32 j .LBB0_3 .LBB0_2: li a2, 66 li a3, 111 li a4, 98 li a1, 1 .LBB0_3: li a5, 121 sb a2, 0(a0) sb a3, 1(a0) sb a4, 2(a0) sb a5, 3(a0) sh zero, 4(a0) sh zero, 6(a0) sh zero, 8(a0) sh zero, 10(a0) sh zero, 12(a0) sh zero, 14(a0) sh a1, 16(a0) ret This now looks a lot like what we got from GCC.\nBut I quickly found it seems to be due to it being an odd number of bytes. Where even numbers will down level to just store halfs while odd numbers end up invoking memset. Very interesting.\n",
+  "wordCount" : "2689",
+  "inLanguage": "en",
+  "datePublished": "2026-06-09T00:00:00Z",
+  "dateModified": "2026-06-09T00:00:00Z",
+  "author":{
+    "@type": "Person",
+    "name": "Rainbain Blog"
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://rainbain.github.io/rainbain-blog/posts/guess-that-optimization-struct-initialization/"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://rainbain.github.io/rainbain-blog/favicon.ico"
+    }
+  }
+}
+</script>
+</head>
+<body id="top">
+    <header class="header">
+    <nav class="header-nav">
+        <div class="logo">
+            <div class="logo-switches">
+                <button id="theme-toggle" class="theme-toggle" accesskey="t" title="(Alt + T)" aria-label="Toggle theme">
+                    <svg class="moon" xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                    </svg>
+                    <svg class="sun" xmlns="http://www.w3.org/2000/svg" width="17" height="17" viewBox="0 0 24 24"
+                        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                        stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="5"></circle>
+                        <line x1="12" y1="1" x2="12" y2="3"></line>
+                        <line x1="12" y1="21" x2="12" y2="23"></line>
+                        <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                        <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                        <line x1="1" y1="12" x2="3" y2="12"></line>
+                        <line x1="21" y1="12" x2="23" y2="12"></line>
+                        <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                        <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        <ul id="menu" class="menu">
+            <li>
+                <a href="https://rainbain.github.io/rainbain-blog/posts/" title="Posts">
+                    <span>Posts</span>
+                </a>
+            </li>
+            <li>
+                <a href="https://rainbain.github.io/rainbain-blog/tags/" title="Tags">
+                    <span>Tags</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</header>
+<main class="main">
+
+<article class="post-single">
+  <header class="post-header">
+    
+    <h1 class="post-title entry-hint-parent">
+      GUESS THAT OPTIMIZATION
+    </h1>
+    <div class="post-meta">
+
+<span title='2026-06-09 00:00:00 +0000 UTC'>June 9, 2026</span>&nbsp;·&nbsp;<span>13 min</span>&nbsp;·&nbsp;<span>Rainbain Blog</span>
+
+</div>
+  </header> 
+  <div class="post-content md-content"><h1 id="guess-that-optimization-struct-initialization">Guess That Optimization, Struct Initialization<a hidden class="anchor" aria-hidden="true" href="#guess-that-optimization-struct-initialization">#</a></h1>
+<p><img alt="Guess That Optimization" loading="lazy" src="/rainbain-blog/posts/guess-that-optimization-struct-initialization/guess-optimization.png"></p>
+<p>It is legend that many hardware engineers working in low level languages like C optimize code more based on &ldquo;feeling&rdquo; and what they think the compiler will do. They write bad &ldquo;optimized&rdquo; code that&rsquo;s both harder to read and less efficient.</p>
+<p>As a hardware engineer myself with little experience as to how compilers actually work and 10+ years of experience coding in C, I fit the bill perfectly.</p>
+<p>We will also play today&rsquo;s game with two other contestants. A fellow C developer, and Claude.</p>
+<p>All will be put to the test in today&rsquo;s game of Guess That Optimization. Feel free to compete and follow along yourself.</p>
+<h2 id="introduction-to-why">Introduction To Why<a hidden class="anchor" aria-hidden="true" href="#introduction-to-why">#</a></h2>
+<p>Though the beforehand legend may be overexaggerated, it&rsquo;s not something I am new to, and I, and many others, have fallen victim to many times.</p>
+<p>I have come to avoid so many &ldquo;anti-patterns&rdquo;, bad coding practices, in C, that I really just imagined existing based on assumptions of how the compiler worked internally, and wrote C code to try and baby the compiler into generating clean assembly.</p>
+<p>As time has gone on though, I have come to realize, my &ldquo;babying&rdquo; of the compiler was just confusing it, making my code harder to optimize, and all at the sacrifice of the reader. Maybe we just deep down think optimized code should look unreadable and hard to follow or something.</p>
+<p>Even then, after tonight&rsquo;s game, I came to realize I was still dramatically wrong and should be much more humble about what the compiler will do.</p>
+<h2 id="rules-of-the-game">Rules of the Game<a hidden class="anchor" aria-hidden="true" href="#rules-of-the-game">#</a></h2>
+<p>Tonight&rsquo;s game will be run using 3 simple C (technically C++) functions to construct a struct. All C functions behave the same, but use slightly different methods. No fancy math, vectorization, or anything, we&rsquo;re just copying some data. This should be easy, right?</p>
+<p>Two compilers will compete tonight to optimize them. GCC 16.1.0 and Clang 22.1.0.
+Both of them will be compiling for RISC-V RV32GC instruction set architecture.</p>
+<p>I chose RISC-V because it&rsquo;s an assembly language I know the best, and provides clean and simple assembly with hopefully fewer footguns.</p>
+<p>Tonight&rsquo;s game was made possible with <a href="https://godbolt.org/">Compiler Explorer</a>, an interactive website to quickly view the assembly output of a compiler.</p>
+<h2 id="the-code">The Code<a hidden class="anchor" aria-hidden="true" href="#the-code">#</a></h2>
+<p>We will be constructing a struct in each function. Each function will operate the same. The struct contains both text, and a 16 bit unsigned value.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;stdint.h&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;stdbool.h&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span><span style="color:#75715e">#include</span> <span style="color:#75715e">&lt;string.h&gt;</span><span style="color:#75715e">
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span>  
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">typedef</span> <span style="color:#66d9ef">struct</span> {
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">char</span> name[<span style="color:#ae81ff">16</span>];
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">uint16_t</span> number_of_cats;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>} <span style="color:#66d9ef">super_cool_thing_t</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">super_cool_thing_t</span> <span style="color:#a6e22e">get_thing1</span>(<span style="color:#66d9ef">const</span> <span style="color:#66d9ef">char</span><span style="color:#f92672">*</span> name, <span style="color:#66d9ef">bool</span> i_like_dogs) {
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">if</span>(i_like_dogs) {
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">return</span> <span style="color:#66d9ef">super_cool_thing_t</span> { <span style="color:#75715e">// The following appears to be a C++ thing:
+</span></span></span><span style="display:flex;"><span><span style="color:#75715e"></span>
+</span></span><span style="display:flex;"><span>name: {<span style="color:#e6db74">&#39;B&#39;</span>, <span style="color:#e6db74">&#39;o&#39;</span>, <span style="color:#e6db74">&#39;b&#39;</span>, <span style="color:#e6db74">&#39;\0&#39;</span>},
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>number_of_cats: <span style="color:#ae81ff">1</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>};
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>} <span style="color:#66d9ef">else</span> {
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">return</span> <span style="color:#66d9ef">super_cool_thing_t</span> {
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>name: {<span style="color:#e6db74">&#39;T&#39;</span>, <span style="color:#e6db74">&#39;i&#39;</span>, <span style="color:#e6db74">&#39;m&#39;</span>, <span style="color:#e6db74">&#39;\0&#39;</span>},
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>number_of_cats: <span style="color:#ae81ff">32</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>};
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">void</span> <span style="color:#a6e22e">get_thing2</span>(<span style="color:#66d9ef">super_cool_thing_t</span><span style="color:#f92672">*</span> r, <span style="color:#66d9ef">const</span> <span style="color:#66d9ef">char</span><span style="color:#f92672">*</span> name, <span style="color:#66d9ef">bool</span> i_like_dogs) {
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">memset</span>(r, <span style="color:#ae81ff">0</span>, <span style="color:#66d9ef">sizeof</span>(<span style="color:#f92672">*</span>r));
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">if</span>(i_like_dogs) {
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>r<span style="color:#f92672">-&gt;</span>name[<span style="color:#ae81ff">0</span>] <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;B&#39;</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>r<span style="color:#f92672">-&gt;</span>name[<span style="color:#ae81ff">1</span>] <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;o&#39;</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>r<span style="color:#f92672">-&gt;</span>name[<span style="color:#ae81ff">2</span>] <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;b&#39;</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>r<span style="color:#f92672">-&gt;</span>name[<span style="color:#ae81ff">3</span>] <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;\0&#39;</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>r<span style="color:#f92672">-&gt;</span>number_of_cats <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>} <span style="color:#66d9ef">else</span> {
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>r<span style="color:#f92672">-&gt;</span>name[<span style="color:#ae81ff">0</span>] <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;T&#39;</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>r<span style="color:#f92672">-&gt;</span>name[<span style="color:#ae81ff">1</span>] <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;i&#39;</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>r<span style="color:#f92672">-&gt;</span>name[<span style="color:#ae81ff">2</span>] <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;m&#39;</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>r<span style="color:#f92672">-&gt;</span>name[<span style="color:#ae81ff">3</span>] <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;\0&#39;</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>r<span style="color:#f92672">-&gt;</span>number_of_cats <span style="color:#f92672">=</span> <span style="color:#ae81ff">32</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">super_cool_thing_t</span> <span style="color:#a6e22e">get_thing3</span>(<span style="color:#66d9ef">const</span> <span style="color:#66d9ef">char</span><span style="color:#f92672">*</span> name, <span style="color:#66d9ef">bool</span> i_like_dogs) {
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">super_cool_thing_t</span> t <span style="color:#f92672">=</span> {<span style="color:#ae81ff">0</span>};
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">if</span> (i_like_dogs) {
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">strcpy</span>(t.name, <span style="color:#e6db74">&#34;Bob&#34;</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>t.number_of_cats <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>} <span style="color:#66d9ef">else</span> {
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">strcpy</span>(t.name, <span style="color:#e6db74">&#34;Tim&#34;</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>t.number_of_cats <span style="color:#f92672">=</span> <span style="color:#ae81ff">32</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">return</span> t;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>Each function returns type <code>super_cool_thing_t</code>. If you like dogs, it puts in your name as Bob and ensures you only have 1 cat. If you don&rsquo;t like dogs, it assumes you&rsquo;re Tim, love cats, and gives you 32 cats to go along with it.</p>
+<h3 id="get_thing1">get_thing1<a hidden class="anchor" aria-hidden="true" href="#get_thing1">#</a></h3>
+<p>This is the first method that comes to mind for me. I just return 1 of two structs depending on if you like dogs or not.</p>
+<p>It&rsquo;s worth noting the <code>name: value</code> only compiles if told to be treated as C++, not C. I included this, because I started doing it because of Rust and SystemVerilog. In both, I like it when setting up structs and ports respectively because it&rsquo;s more clear to me what you&rsquo;re setting.</p>
+<p>This one is probably the most readable to me, except for my weird way of setting the strings.</p>
+<h3 id="get_thing2">get_thing2<a hidden class="anchor" aria-hidden="true" href="#get_thing2">#</a></h3>
+<p>This was my attempt at an &ldquo;optimized&rdquo; version. Passing <code>super_cool_thing_t* r</code> as a pointer instead of just returning it is probably pointless here. If you don&rsquo;t do that the compiler should just have the caller make space, and pass a pointer to it just like I did here manually.</p>
+<p>Anyhow, this to me is equivalent to get_thing1. I just distrusted the compiler and did it all manually.</p>
+<h3 id="get_thing3">get_thing3<a hidden class="anchor" aria-hidden="true" href="#get_thing3">#</a></h3>
+<p>This one is a cross between <strong>get_thing1</strong> and <strong>get_thing2</strong>.</p>
+<p>Instead of distrusting the compiler with return value optimizations (RVO), I just went ahead and returned the struct.</p>
+<p>But instead of having two different struct initializations, I explicitly cleared it, then filled out the structs with strcpy.</p>
+<h2 id="the-contestants-answers">The Contestants&rsquo; Answers<a hidden class="anchor" aria-hidden="true" href="#the-contestants-answers">#</a></h2>
+<h3 id="myself">Myself<a hidden class="anchor" aria-hidden="true" href="#myself">#</a></h3>
+<p>I thought <strong>get_thing2</strong> would be the fastest, then <strong>get_thing1</strong>, and then <strong>get_thing3</strong>.</p>
+<p>My reasoning was <strong>get_thing2</strong> was the most direct in operation. It says, everything will be zeros. Then says what each byte should be. To me, that everything is pretty much known easily, just set up the data.</p>
+<p><strong>get_thing1</strong> should be no different to me. I have no reason to distrust RVO right?</p>
+<p>Then <strong>get_thing3</strong> just seemed like the worst of both worlds. We&rsquo;re trusting the compiler with RVO and inlining strcpy. So it just seems the most prone to issues.</p>
+<h3 id="fellow-c-developer-awewsomegamer">Fellow C Developer (awewsomegamer)<a hidden class="anchor" aria-hidden="true" href="#fellow-c-developer-awewsomegamer">#</a></h3>
+<p>Awewsomegamer speculated <strong>get_thing1</strong> would be the fastest. <strong>get_thing2</strong> would come in second. And <strong>get_thing3</strong> being prone to be the slowest.</p>
+<p>Very similar reasoning, <strong>get_thing1</strong> was very upfront and direct with the compiler. Set up the caller&rsquo;s call stack with this, that&rsquo;s it, easy.</p>
+<p>Then <strong>get_thing2</strong> was speculated to be the same, and should give if not the same output.</p>
+<p>Same story with <strong>get_thing3</strong>, it&rsquo;s really just a more indirect version of the other two and we&rsquo;re depending on strcpy to play nicely.</p>
+<h3 id="claude">Claude<a hidden class="anchor" aria-hidden="true" href="#claude">#</a></h3>
+<p>Claude rated them as follows.
+<code>get_thing1</code> — likely slowest or middle
+<code>get_thing2</code> — likely fastest
+<code>get_thing3</code> — likely middle or slowest</p>
+<p>It justified <strong>get_thing1</strong> as slowest because it distrusted RVO. It stated that it would have to construct two <code>super_cool_thing_t</code> then likely memcpy the result.</p>
+<p><strong>get_thing2</strong> was seen as the fastest for the same reason. It thought the lack of hidden-pointer ABI overhead on the return value would make it &ldquo;minimal, predictable, no copying.&rdquo; It also noted the <strong>memset</strong> would likely be optimized out.</p>
+<p><strong>get_thing3</strong> it predicted to be the slowest. It noted the <code>{0}</code> zero-init is likely the same as memset, but noted that the strcpy would likely not be optimized out, and act as an unnecessary function call.</p>
+<h2 id="round-1-clang">Round 1, Clang<a hidden class="anchor" aria-hidden="true" href="#round-1-clang">#</a></h2>
+<p>The original function and the generated assembly are provided. I recommend reading through each to see how the compiler approached the problem.</p>
+<h3 id="get_thing1-1">get_thing1<a hidden class="anchor" aria-hidden="true" href="#get_thing1-1">#</a></h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#66d9ef">super_cool_thing_t</span> <span style="color:#a6e22e">get_thing1</span>(<span style="color:#66d9ef">const</span> <span style="color:#66d9ef">char</span><span style="color:#f92672">*</span> name, <span style="color:#66d9ef">bool</span> i_like_dogs) {
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">if</span>(i_like_dogs) {
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">return</span> <span style="color:#66d9ef">super_cool_thing_t</span> {
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>name: {<span style="color:#e6db74">&#39;B&#39;</span>, <span style="color:#e6db74">&#39;o&#39;</span>, <span style="color:#e6db74">&#39;b&#39;</span>, <span style="color:#e6db74">&#39;\0&#39;</span>},
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>number_of_cats: <span style="color:#ae81ff">1</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>};
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>} <span style="color:#66d9ef">else</span> {
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">return</span> <span style="color:#66d9ef">super_cool_thing_t</span> {
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>name: {<span style="color:#e6db74">&#39;T&#39;</span>, <span style="color:#e6db74">&#39;i&#39;</span>, <span style="color:#e6db74">&#39;m&#39;</span>, <span style="color:#e6db74">&#39;\0&#39;</span>},
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>number_of_cats: <span style="color:#ae81ff">32</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>};
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-asm" data-lang="asm"><span style="display:flex;"><span><span style="color:#a6e22e">get_thing1</span>(<span style="color:#66d9ef">char</span> <span style="color:#66d9ef">const</span>*, <span style="color:#66d9ef">bool</span>):
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">addi</span> <span style="color:#66d9ef">sp</span>, <span style="color:#66d9ef">sp</span>, -<span style="color:#ae81ff">16</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">sw</span> <span style="color:#66d9ef">ra</span>, <span style="color:#ae81ff">12</span>(<span style="color:#66d9ef">sp</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">sw</span> <span style="color:#66d9ef">s0</span>, <span style="color:#ae81ff">8</span>(<span style="color:#66d9ef">sp</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">sw</span> <span style="color:#66d9ef">s1</span>, <span style="color:#ae81ff">4</span>(<span style="color:#66d9ef">sp</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">mv</span> <span style="color:#66d9ef">s0</span>, <span style="color:#66d9ef">a0</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">addi</span> <span style="color:#66d9ef">a0</span>, <span style="color:#66d9ef">a0</span>, <span style="color:#ae81ff">3</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">bnez</span> <span style="color:#66d9ef">a2</span>, <span style="color:#66d9ef">.LBB0_2</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">li</span> <span style="color:#66d9ef">a1</span>, <span style="color:#ae81ff">84</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">li</span> <span style="color:#66d9ef">a2</span>, <span style="color:#ae81ff">105</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">li</span> <span style="color:#66d9ef">a3</span>, <span style="color:#ae81ff">109</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">li</span> <span style="color:#66d9ef">s1</span>, <span style="color:#ae81ff">32</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">j</span> <span style="color:#66d9ef">.LBB0_3</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>.LBB0_2:
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">li</span> <span style="color:#66d9ef">a1</span>, <span style="color:#ae81ff">66</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">li</span> <span style="color:#66d9ef">a2</span>, <span style="color:#ae81ff">111</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">li</span> <span style="color:#66d9ef">a3</span>, <span style="color:#ae81ff">98</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">li</span> <span style="color:#66d9ef">s1</span>, <span style="color:#ae81ff">1</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>.LBB0_3:
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">sb</span> <span style="color:#66d9ef">a1</span>, <span style="color:#ae81ff">0</span>(<span style="color:#66d9ef">s0</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">sb</span> <span style="color:#66d9ef">a2</span>, <span style="color:#ae81ff">1</span>(<span style="color:#66d9ef">s0</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">sb</span> <span style="color:#66d9ef">a3</span>, <span style="color:#ae81ff">2</span>(<span style="color:#66d9ef">s0</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">li</span> <span style="color:#66d9ef">a2</span>, <span style="color:#ae81ff">13</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">li</span> <span style="color:#66d9ef">a1</span>, <span style="color:#ae81ff">0</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">call</span> <span style="color:#66d9ef">memset</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">sh</span> <span style="color:#66d9ef">s1</span>, <span style="color:#ae81ff">16</span>(<span style="color:#66d9ef">s0</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">lw</span> <span style="color:#66d9ef">ra</span>, <span style="color:#ae81ff">12</span>(<span style="color:#66d9ef">sp</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">lw</span> <span style="color:#66d9ef">s0</span>, <span style="color:#ae81ff">8</span>(<span style="color:#66d9ef">sp</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">lw</span> <span style="color:#66d9ef">s1</span>, <span style="color:#ae81ff">4</span>(<span style="color:#66d9ef">sp</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">addi</span> <span style="color:#66d9ef">sp</span>, <span style="color:#66d9ef">sp</span>, <span style="color:#ae81ff">16</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">ret</span>
+</span></span></code></pre></div><p>This operation makes an entire stack frame, calls memset, and uses 23-24 instructions.</p>
+<p>Clang&rsquo;s choice to call <strong>memset</strong> is quite weird here, and we will have to investigate more later.</p>
+<p>Clang chose to construct the string 1 byte at a time.</p>
+<h3 id="get_thing2-1">get_thing2<a hidden class="anchor" aria-hidden="true" href="#get_thing2-1">#</a></h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#66d9ef">void</span> <span style="color:#a6e22e">get_thing2</span>(<span style="color:#66d9ef">super_cool_thing_t</span><span style="color:#f92672">*</span> r, <span style="color:#66d9ef">const</span> <span style="color:#66d9ef">char</span><span style="color:#f92672">*</span> name, <span style="color:#66d9ef">bool</span> i_like_dogs) {
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">memset</span>(r, <span style="color:#ae81ff">0</span>, <span style="color:#66d9ef">sizeof</span>(<span style="color:#f92672">*</span>r));
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">if</span>(i_like_dogs) {
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>r<span style="color:#f92672">-&gt;</span>name[<span style="color:#ae81ff">0</span>] <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;B&#39;</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>r<span style="color:#f92672">-&gt;</span>name[<span style="color:#ae81ff">1</span>] <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;o&#39;</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>r<span style="color:#f92672">-&gt;</span>name[<span style="color:#ae81ff">2</span>] <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;b&#39;</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>r<span style="color:#f92672">-&gt;</span>name[<span style="color:#ae81ff">3</span>] <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;\0&#39;</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>r<span style="color:#f92672">-&gt;</span>number_of_cats <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>} <span style="color:#66d9ef">else</span> {
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>r<span style="color:#f92672">-&gt;</span>name[<span style="color:#ae81ff">0</span>] <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;T&#39;</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>r<span style="color:#f92672">-&gt;</span>name[<span style="color:#ae81ff">1</span>] <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;i&#39;</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>r<span style="color:#f92672">-&gt;</span>name[<span style="color:#ae81ff">2</span>] <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;m&#39;</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>r<span style="color:#f92672">-&gt;</span>name[<span style="color:#ae81ff">3</span>] <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;\0&#39;</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>r<span style="color:#f92672">-&gt;</span>number_of_cats <span style="color:#f92672">=</span> <span style="color:#ae81ff">32</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-asm" data-lang="asm"><span style="display:flex;"><span><span style="color:#a6e22e">get_thing2</span>(<span style="color:#66d9ef">super_cool_thing_t</span>*, <span style="color:#66d9ef">char</span> <span style="color:#66d9ef">const</span>*, <span style="color:#66d9ef">bool</span>):
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">sh</span> <span style="color:#66d9ef">zero</span>, <span style="color:#ae81ff">12</span>(<span style="color:#66d9ef">a0</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">sh</span> <span style="color:#66d9ef">zero</span>, <span style="color:#ae81ff">14</span>(<span style="color:#66d9ef">a0</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">sh</span> <span style="color:#66d9ef">zero</span>, <span style="color:#ae81ff">4</span>(<span style="color:#66d9ef">a0</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">sh</span> <span style="color:#66d9ef">zero</span>, <span style="color:#ae81ff">6</span>(<span style="color:#66d9ef">a0</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">sh</span> <span style="color:#66d9ef">zero</span>, <span style="color:#ae81ff">8</span>(<span style="color:#66d9ef">a0</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">sh</span> <span style="color:#66d9ef">zero</span>, <span style="color:#ae81ff">10</span>(<span style="color:#66d9ef">a0</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">beqz</span> <span style="color:#66d9ef">a2</span>, <span style="color:#66d9ef">.LBB1_2</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">li</span> <span style="color:#66d9ef">a1</span>, <span style="color:#ae81ff">1</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">li</span> <span style="color:#66d9ef">a2</span>, <span style="color:#ae81ff">98</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">li</span> <span style="color:#66d9ef">a3</span>, <span style="color:#ae81ff">111</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">li</span> <span style="color:#66d9ef">a4</span>, <span style="color:#ae81ff">66</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">sb</span> <span style="color:#66d9ef">a4</span>, <span style="color:#ae81ff">0</span>(<span style="color:#66d9ef">a0</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">sb</span> <span style="color:#66d9ef">a3</span>, <span style="color:#ae81ff">1</span>(<span style="color:#66d9ef">a0</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">sb</span> <span style="color:#66d9ef">a2</span>, <span style="color:#ae81ff">2</span>(<span style="color:#66d9ef">a0</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">sb</span> <span style="color:#66d9ef">zero</span>, <span style="color:#ae81ff">3</span>(<span style="color:#66d9ef">a0</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">sh</span> <span style="color:#66d9ef">a1</span>, <span style="color:#ae81ff">16</span>(<span style="color:#66d9ef">a0</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">ret</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>.LBB1_2:
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">li</span> <span style="color:#66d9ef">a1</span>, <span style="color:#ae81ff">32</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">li</span> <span style="color:#66d9ef">a2</span>, <span style="color:#ae81ff">109</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">li</span> <span style="color:#66d9ef">a3</span>, <span style="color:#ae81ff">105</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">li</span> <span style="color:#66d9ef">a4</span>, <span style="color:#ae81ff">84</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">sb</span> <span style="color:#66d9ef">a4</span>, <span style="color:#ae81ff">0</span>(<span style="color:#66d9ef">a0</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">sb</span> <span style="color:#66d9ef">a3</span>, <span style="color:#ae81ff">1</span>(<span style="color:#66d9ef">a0</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">sb</span> <span style="color:#66d9ef">a2</span>, <span style="color:#ae81ff">2</span>(<span style="color:#66d9ef">a0</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">sb</span> <span style="color:#66d9ef">zero</span>, <span style="color:#ae81ff">3</span>(<span style="color:#66d9ef">a0</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">sh</span> <span style="color:#66d9ef">a1</span>, <span style="color:#ae81ff">16</span>(<span style="color:#66d9ef">a0</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">ret</span>
+</span></span></code></pre></div><p>This uses 18 instructions, and no stack frame due to no more <strong>memset</strong> calls.</p>
+<p>It&rsquo;s weird to see here our explicit <strong>memset</strong> got inlined, while Clang&rsquo;s implicit <strong>memset</strong> did not. The ordering of the function too is quite different.</p>
+<p>Clang chose to clear it two bytes at a time, construct the string one byte at a time, and in general is much nicer than the first.</p>
+<h3 id="get_thing3-1">get_thing3<a hidden class="anchor" aria-hidden="true" href="#get_thing3-1">#</a></h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#66d9ef">super_cool_thing_t</span> <span style="color:#a6e22e">get_thing3</span>(<span style="color:#66d9ef">const</span> <span style="color:#66d9ef">char</span><span style="color:#f92672">*</span> name, <span style="color:#66d9ef">bool</span> i_like_dogs) {
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">super_cool_thing_t</span> t <span style="color:#f92672">=</span> {<span style="color:#ae81ff">0</span>};
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">if</span> (i_like_dogs) {
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">strcpy</span>(t.name, <span style="color:#e6db74">&#34;Bob&#34;</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>t.number_of_cats <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>} <span style="color:#66d9ef">else</span> {
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">strcpy</span>(t.name, <span style="color:#e6db74">&#34;Tim&#34;</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>t.number_of_cats <span style="color:#f92672">=</span> <span style="color:#ae81ff">32</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">return</span> t;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-asm" data-lang="asm"><span style="display:flex;"><span><span style="color:#a6e22e">get_thing3</span>(<span style="color:#66d9ef">char</span> <span style="color:#66d9ef">const</span>*, <span style="color:#66d9ef">bool</span>):
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">sh</span> <span style="color:#66d9ef">zero</span>, <span style="color:#ae81ff">12</span>(<span style="color:#66d9ef">a0</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">sh</span> <span style="color:#66d9ef">zero</span>, <span style="color:#ae81ff">14</span>(<span style="color:#66d9ef">a0</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">sh</span> <span style="color:#66d9ef">zero</span>, <span style="color:#ae81ff">4</span>(<span style="color:#66d9ef">a0</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">sh</span> <span style="color:#66d9ef">zero</span>, <span style="color:#ae81ff">6</span>(<span style="color:#66d9ef">a0</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">sh</span> <span style="color:#66d9ef">zero</span>, <span style="color:#ae81ff">8</span>(<span style="color:#66d9ef">a0</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">sh</span> <span style="color:#66d9ef">zero</span>, <span style="color:#ae81ff">10</span>(<span style="color:#66d9ef">a0</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">bnez</span> <span style="color:#66d9ef">a2</span>, <span style="color:#66d9ef">.LBB2_2</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">lui</span> <span style="color:#66d9ef">a2</span>, <span style="color:#ae81ff">1751</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">addi</span> <span style="color:#66d9ef">a2</span>, <span style="color:#66d9ef">a2</span>, -<span style="color:#ae81ff">1708</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">li</span> <span style="color:#66d9ef">a1</span>, <span style="color:#ae81ff">32</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">srli</span> <span style="color:#66d9ef">a3</span>, <span style="color:#66d9ef">a2</span>, <span style="color:#ae81ff">16</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">sh</span> <span style="color:#66d9ef">a2</span>, <span style="color:#ae81ff">0</span>(<span style="color:#66d9ef">a0</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">sh</span> <span style="color:#66d9ef">a3</span>, <span style="color:#ae81ff">2</span>(<span style="color:#66d9ef">a0</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">sh</span> <span style="color:#66d9ef">a1</span>, <span style="color:#ae81ff">16</span>(<span style="color:#66d9ef">a0</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">ret</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>.LBB2_2:
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">lui</span> <span style="color:#66d9ef">a2</span>, <span style="color:#ae81ff">1575</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">addi</span> <span style="color:#66d9ef">a2</span>, <span style="color:#66d9ef">a2</span>, -<span style="color:#ae81ff">190</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">li</span> <span style="color:#66d9ef">a1</span>, <span style="color:#ae81ff">1</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">srli</span> <span style="color:#66d9ef">a3</span>, <span style="color:#66d9ef">a2</span>, <span style="color:#ae81ff">16</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">sh</span> <span style="color:#66d9ef">a2</span>, <span style="color:#ae81ff">0</span>(<span style="color:#66d9ef">a0</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">sh</span> <span style="color:#66d9ef">a3</span>, <span style="color:#ae81ff">2</span>(<span style="color:#66d9ef">a0</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">sh</span> <span style="color:#66d9ef">a1</span>, <span style="color:#ae81ff">16</span>(<span style="color:#66d9ef">a0</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">ret</span>
+</span></span></code></pre></div><p>This uses 16 instructions, and is the shortest so far.</p>
+<p>Both the <strong>memset</strong> and both <strong>strcpy</strong>s got inlined and resulted in an overall shorter output.</p>
+<p>Clang both cleared it out two bytes at a time, and constructed the string two bytes at a time resulting in the shorter output.</p>
+<p>For clang, <strong>get_thing3</strong> has been the best, while it dropped the ball on <strong>get_thing1.</strong></p>
+<h2 id="round-2-gcc">Round 2, GCC<a hidden class="anchor" aria-hidden="true" href="#round-2-gcc">#</a></h2>
+<h3 id="get_thing1-2">get_thing1<a hidden class="anchor" aria-hidden="true" href="#get_thing1-2">#</a></h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#66d9ef">super_cool_thing_t</span> <span style="color:#a6e22e">get_thing1</span>(<span style="color:#66d9ef">const</span> <span style="color:#66d9ef">char</span><span style="color:#f92672">*</span> name, <span style="color:#66d9ef">bool</span> i_like_dogs) {
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">if</span>(i_like_dogs) {
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">return</span> <span style="color:#66d9ef">super_cool_thing_t</span> {
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>name: {<span style="color:#e6db74">&#39;B&#39;</span>, <span style="color:#e6db74">&#39;o&#39;</span>, <span style="color:#e6db74">&#39;b&#39;</span>, <span style="color:#e6db74">&#39;\0&#39;</span>},
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>number_of_cats: <span style="color:#ae81ff">1</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>};
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>} <span style="color:#66d9ef">else</span> {
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">return</span> <span style="color:#66d9ef">super_cool_thing_t</span> {
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>name: {<span style="color:#e6db74">&#39;T&#39;</span>, <span style="color:#e6db74">&#39;i&#39;</span>, <span style="color:#e6db74">&#39;m&#39;</span>, <span style="color:#e6db74">&#39;\0&#39;</span>},
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>number_of_cats: <span style="color:#ae81ff">32</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>};
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-asm" data-lang="asm"><span style="display:flex;"><span><span style="color:#a6e22e">get_thing1</span>(<span style="color:#66d9ef">char</span> <span style="color:#66d9ef">const</span>*, <span style="color:#66d9ef">bool</span>):
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">li</span> <span style="color:#66d9ef">a5</span>,<span style="color:#ae81ff">28672</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">beq</span> <span style="color:#66d9ef">a2</span>,<span style="color:#66d9ef">zero</span>,.<span style="color:#66d9ef">L3</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">addi</span> <span style="color:#66d9ef">a5</span>,<span style="color:#66d9ef">a5</span>,-<span style="color:#ae81ff">190</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">li</span> <span style="color:#66d9ef">a3</span>,<span style="color:#ae81ff">98</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">li</span> <span style="color:#66d9ef">a4</span>,<span style="color:#ae81ff">1</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>.L2:
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">sb</span> <span style="color:#66d9ef">zero</span>,<span style="color:#ae81ff">3</span>(<span style="color:#66d9ef">a0</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">sb</span> <span style="color:#66d9ef">zero</span>,<span style="color:#ae81ff">4</span>(<span style="color:#66d9ef">a0</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">sb</span> <span style="color:#66d9ef">zero</span>,<span style="color:#ae81ff">5</span>(<span style="color:#66d9ef">a0</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">sb</span> <span style="color:#66d9ef">zero</span>,<span style="color:#ae81ff">6</span>(<span style="color:#66d9ef">a0</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">sb</span> <span style="color:#66d9ef">zero</span>,<span style="color:#ae81ff">7</span>(<span style="color:#66d9ef">a0</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">sb</span> <span style="color:#66d9ef">zero</span>,<span style="color:#ae81ff">8</span>(<span style="color:#66d9ef">a0</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">sb</span> <span style="color:#66d9ef">zero</span>,<span style="color:#ae81ff">9</span>(<span style="color:#66d9ef">a0</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">sb</span> <span style="color:#66d9ef">zero</span>,<span style="color:#ae81ff">10</span>(<span style="color:#66d9ef">a0</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">sb</span> <span style="color:#66d9ef">zero</span>,<span style="color:#ae81ff">11</span>(<span style="color:#66d9ef">a0</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">sb</span> <span style="color:#66d9ef">zero</span>,<span style="color:#ae81ff">12</span>(<span style="color:#66d9ef">a0</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">sb</span> <span style="color:#66d9ef">zero</span>,<span style="color:#ae81ff">13</span>(<span style="color:#66d9ef">a0</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">sb</span> <span style="color:#66d9ef">zero</span>,<span style="color:#ae81ff">14</span>(<span style="color:#66d9ef">a0</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">sb</span> <span style="color:#66d9ef">zero</span>,<span style="color:#ae81ff">15</span>(<span style="color:#66d9ef">a0</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">sh</span> <span style="color:#66d9ef">a5</span>,<span style="color:#ae81ff">0</span>(<span style="color:#66d9ef">a0</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">sb</span> <span style="color:#66d9ef">a3</span>,<span style="color:#ae81ff">2</span>(<span style="color:#66d9ef">a0</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">sh</span> <span style="color:#66d9ef">a4</span>,<span style="color:#ae81ff">16</span>(<span style="color:#66d9ef">a0</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">ret</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>.L3:
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">addi</span> <span style="color:#66d9ef">a5</span>,<span style="color:#66d9ef">a5</span>,-<span style="color:#ae81ff">1708</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">li</span> <span style="color:#66d9ef">a3</span>,<span style="color:#ae81ff">109</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">li</span> <span style="color:#66d9ef">a4</span>,<span style="color:#ae81ff">32</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">j</span> <span style="color:#66d9ef">.L2</span>
+</span></span></code></pre></div><p>This uses 21-22 instructions and did not produce a whole stack frame with <strong>memset</strong> call like Clang.</p>
+<p>GCC produced a much cleaner output than Clang here. It chose to clear it out and construct the string 1 byte at a time.</p>
+<h3 id="get_thing2-2">get_thing2<a hidden class="anchor" aria-hidden="true" href="#get_thing2-2">#</a></h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#66d9ef">void</span> <span style="color:#a6e22e">get_thing2</span>(<span style="color:#66d9ef">super_cool_thing_t</span><span style="color:#f92672">*</span> r, <span style="color:#66d9ef">const</span> <span style="color:#66d9ef">char</span><span style="color:#f92672">*</span> name, <span style="color:#66d9ef">bool</span> i_like_dogs) {
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">memset</span>(r, <span style="color:#ae81ff">0</span>, <span style="color:#66d9ef">sizeof</span>(<span style="color:#f92672">*</span>r));
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">if</span>(i_like_dogs) {
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>r<span style="color:#f92672">-&gt;</span>name[<span style="color:#ae81ff">0</span>] <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;B&#39;</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>r<span style="color:#f92672">-&gt;</span>name[<span style="color:#ae81ff">1</span>] <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;o&#39;</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>r<span style="color:#f92672">-&gt;</span>name[<span style="color:#ae81ff">2</span>] <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;b&#39;</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>r<span style="color:#f92672">-&gt;</span>name[<span style="color:#ae81ff">3</span>] <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;\0&#39;</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>r<span style="color:#f92672">-&gt;</span>number_of_cats <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>} <span style="color:#66d9ef">else</span> {
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>r<span style="color:#f92672">-&gt;</span>name[<span style="color:#ae81ff">0</span>] <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;T&#39;</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>r<span style="color:#f92672">-&gt;</span>name[<span style="color:#ae81ff">1</span>] <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;i&#39;</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>r<span style="color:#f92672">-&gt;</span>name[<span style="color:#ae81ff">2</span>] <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;m&#39;</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>r<span style="color:#f92672">-&gt;</span>name[<span style="color:#ae81ff">3</span>] <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;\0&#39;</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>r<span style="color:#f92672">-&gt;</span>number_of_cats <span style="color:#f92672">=</span> <span style="color:#ae81ff">32</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-asm" data-lang="asm"><span style="display:flex;"><span><span style="color:#a6e22e">get_thing2</span>(<span style="color:#66d9ef">super_cool_thing_t</span>*, <span style="color:#66d9ef">char</span> <span style="color:#66d9ef">const</span>*, <span style="color:#66d9ef">bool</span>):
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">sb</span> <span style="color:#66d9ef">zero</span>,<span style="color:#ae81ff">3</span>(<span style="color:#66d9ef">a0</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">sb</span> <span style="color:#66d9ef">zero</span>,<span style="color:#ae81ff">4</span>(<span style="color:#66d9ef">a0</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">sb</span> <span style="color:#66d9ef">zero</span>,<span style="color:#ae81ff">5</span>(<span style="color:#66d9ef">a0</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">sb</span> <span style="color:#66d9ef">zero</span>,<span style="color:#ae81ff">6</span>(<span style="color:#66d9ef">a0</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">sb</span> <span style="color:#66d9ef">zero</span>,<span style="color:#ae81ff">7</span>(<span style="color:#66d9ef">a0</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">sb</span> <span style="color:#66d9ef">zero</span>,<span style="color:#ae81ff">8</span>(<span style="color:#66d9ef">a0</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">sb</span> <span style="color:#66d9ef">zero</span>,<span style="color:#ae81ff">9</span>(<span style="color:#66d9ef">a0</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">sb</span> <span style="color:#66d9ef">zero</span>,<span style="color:#ae81ff">10</span>(<span style="color:#66d9ef">a0</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">sb</span> <span style="color:#66d9ef">zero</span>,<span style="color:#ae81ff">11</span>(<span style="color:#66d9ef">a0</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">sb</span> <span style="color:#66d9ef">zero</span>,<span style="color:#ae81ff">12</span>(<span style="color:#66d9ef">a0</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">sb</span> <span style="color:#66d9ef">zero</span>,<span style="color:#ae81ff">13</span>(<span style="color:#66d9ef">a0</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">sb</span> <span style="color:#66d9ef">zero</span>,<span style="color:#ae81ff">14</span>(<span style="color:#66d9ef">a0</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">sb</span> <span style="color:#66d9ef">zero</span>,<span style="color:#ae81ff">15</span>(<span style="color:#66d9ef">a0</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">sb</span> <span style="color:#66d9ef">zero</span>,<span style="color:#ae81ff">16</span>(<span style="color:#66d9ef">a0</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">sb</span> <span style="color:#66d9ef">zero</span>,<span style="color:#ae81ff">17</span>(<span style="color:#66d9ef">a0</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">li</span> <span style="color:#66d9ef">a5</span>,<span style="color:#ae81ff">28672</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">beq</span> <span style="color:#66d9ef">a2</span>,<span style="color:#66d9ef">zero</span>,.<span style="color:#66d9ef">L7</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">addi</span> <span style="color:#66d9ef">a5</span>,<span style="color:#66d9ef">a5</span>,-<span style="color:#ae81ff">190</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">li</span> <span style="color:#66d9ef">a3</span>,<span style="color:#ae81ff">98</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">li</span> <span style="color:#66d9ef">a4</span>,<span style="color:#ae81ff">1</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">sh</span> <span style="color:#66d9ef">a5</span>,<span style="color:#ae81ff">0</span>(<span style="color:#66d9ef">a0</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">sb</span> <span style="color:#66d9ef">a3</span>,<span style="color:#ae81ff">2</span>(<span style="color:#66d9ef">a0</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">sh</span> <span style="color:#66d9ef">a4</span>,<span style="color:#ae81ff">16</span>(<span style="color:#66d9ef">a0</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">ret</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>.L7:
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">addi</span> <span style="color:#66d9ef">a5</span>,<span style="color:#66d9ef">a5</span>,-<span style="color:#ae81ff">1708</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">li</span> <span style="color:#66d9ef">a3</span>,<span style="color:#ae81ff">109</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">li</span> <span style="color:#66d9ef">a4</span>,<span style="color:#ae81ff">32</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">sh</span> <span style="color:#66d9ef">a5</span>,<span style="color:#ae81ff">0</span>(<span style="color:#66d9ef">a0</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">sb</span> <span style="color:#66d9ef">a3</span>,<span style="color:#ae81ff">2</span>(<span style="color:#66d9ef">a0</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">sh</span> <span style="color:#66d9ef">a4</span>,<span style="color:#ae81ff">16</span>(<span style="color:#66d9ef">a0</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">ret</span>
+</span></span></code></pre></div><p>This uses 23 instructions and operates about the same as <strong>get_thing1</strong> when compiled with GCC.</p>
+<p>This output is similar to what Clang produced, but with more instructions.</p>
+<h3 id="get_thing3-2">get_thing3<a hidden class="anchor" aria-hidden="true" href="#get_thing3-2">#</a></h3>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#66d9ef">super_cool_thing_t</span> <span style="color:#a6e22e">get_thing3</span>(<span style="color:#66d9ef">const</span> <span style="color:#66d9ef">char</span><span style="color:#f92672">*</span> name, <span style="color:#66d9ef">bool</span> i_like_dogs) {
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">super_cool_thing_t</span> t <span style="color:#f92672">=</span> {<span style="color:#ae81ff">0</span>};
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">if</span> (i_like_dogs) {
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">strcpy</span>(t.name, <span style="color:#e6db74">&#34;Bob&#34;</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>t.number_of_cats <span style="color:#f92672">=</span> <span style="color:#ae81ff">1</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>} <span style="color:#66d9ef">else</span> {
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">strcpy</span>(t.name, <span style="color:#e6db74">&#34;Tim&#34;</span>);
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>t.number_of_cats <span style="color:#f92672">=</span> <span style="color:#ae81ff">32</span>;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">return</span> t;
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-asm" data-lang="asm"><span style="display:flex;"><span><span style="color:#a6e22e">get_thing3</span>(<span style="color:#66d9ef">char</span> <span style="color:#66d9ef">const</span>*, <span style="color:#66d9ef">bool</span>):
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">sh</span> <span style="color:#66d9ef">zero</span>,<span style="color:#ae81ff">0</span>(<span style="color:#66d9ef">a0</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">sh</span> <span style="color:#66d9ef">zero</span>,<span style="color:#ae81ff">2</span>(<span style="color:#66d9ef">a0</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">sh</span> <span style="color:#66d9ef">zero</span>,<span style="color:#ae81ff">4</span>(<span style="color:#66d9ef">a0</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">sh</span> <span style="color:#66d9ef">zero</span>,<span style="color:#ae81ff">6</span>(<span style="color:#66d9ef">a0</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">sh</span> <span style="color:#66d9ef">zero</span>,<span style="color:#ae81ff">8</span>(<span style="color:#66d9ef">a0</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">sh</span> <span style="color:#66d9ef">zero</span>,<span style="color:#ae81ff">10</span>(<span style="color:#66d9ef">a0</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">sh</span> <span style="color:#66d9ef">zero</span>,<span style="color:#ae81ff">12</span>(<span style="color:#66d9ef">a0</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">sh</span> <span style="color:#66d9ef">zero</span>,<span style="color:#ae81ff">14</span>(<span style="color:#66d9ef">a0</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">sh</span> <span style="color:#66d9ef">zero</span>,<span style="color:#ae81ff">16</span>(<span style="color:#66d9ef">a0</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">li</span> <span style="color:#66d9ef">a5</span>,<span style="color:#ae81ff">28672</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">beq</span> <span style="color:#66d9ef">a2</span>,<span style="color:#66d9ef">zero</span>,.<span style="color:#66d9ef">L9</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">addi</span> <span style="color:#66d9ef">a5</span>,<span style="color:#66d9ef">a5</span>,-<span style="color:#ae81ff">190</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">li</span> <span style="color:#66d9ef">a4</span>,<span style="color:#ae81ff">98</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">sh</span> <span style="color:#66d9ef">a5</span>,<span style="color:#ae81ff">0</span>(<span style="color:#66d9ef">a0</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">li</span> <span style="color:#66d9ef">a5</span>,<span style="color:#ae81ff">1</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">sh</span> <span style="color:#66d9ef">a4</span>,<span style="color:#ae81ff">2</span>(<span style="color:#66d9ef">a0</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">sh</span> <span style="color:#66d9ef">a5</span>,<span style="color:#ae81ff">16</span>(<span style="color:#66d9ef">a0</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">ret</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>.L9:
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">addi</span> <span style="color:#66d9ef">a5</span>,<span style="color:#66d9ef">a5</span>,-<span style="color:#ae81ff">1708</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">li</span> <span style="color:#66d9ef">a4</span>,<span style="color:#ae81ff">109</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">sh</span> <span style="color:#66d9ef">a5</span>,<span style="color:#ae81ff">0</span>(<span style="color:#66d9ef">a0</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">li</span> <span style="color:#66d9ef">a5</span>,<span style="color:#ae81ff">32</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">sh</span> <span style="color:#66d9ef">a4</span>,<span style="color:#ae81ff">2</span>(<span style="color:#66d9ef">a0</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">sh</span> <span style="color:#66d9ef">a5</span>,<span style="color:#ae81ff">16</span>(<span style="color:#66d9ef">a0</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">ret</span>
+</span></span></code></pre></div><p>This uses 18 instructions, unlike the Clang version, it zeros it out just before overwriting it, leading to fewer instructions, but in general they are very similar.</p>
+<p>Here it chose to do everything two bytes at a time just like Clang.</p>
+<h2 id="results">Results<a hidden class="anchor" aria-hidden="true" href="#results">#</a></h2>
+<table>
+  <thead>
+      <tr>
+          <th>Version</th>
+          <th>Compiler</th>
+          <th>Instructions</th>
+          <th>Stack Frame</th>
+          <th>memset call</th>
+          <th>Zero strategy</th>
+          <th>String strategy</th>
+      </tr>
+  </thead>
+  <tbody>
+      <tr>
+          <td><code>get_thing1</code></td>
+          <td>Clang</td>
+          <td>23–24 + memset</td>
+          <td>Yes</td>
+          <td>Yes</td>
+          <td>—</td>
+          <td>1 byte at a time</td>
+      </tr>
+      <tr>
+          <td><code>get_thing2</code></td>
+          <td>Clang</td>
+          <td>18</td>
+          <td>No</td>
+          <td>No (inlined)</td>
+          <td>2 bytes at a time</td>
+          <td>1 byte at a time</td>
+      </tr>
+      <tr>
+          <td><code>get_thing3</code></td>
+          <td>Clang</td>
+          <td>16</td>
+          <td>No</td>
+          <td>No (inlined)</td>
+          <td>2 bytes at a time</td>
+          <td>2 bytes at a time</td>
+      </tr>
+      <tr>
+          <td><code>get_thing1</code></td>
+          <td>GCC</td>
+          <td>21–22</td>
+          <td>No</td>
+          <td>No</td>
+          <td>1 byte at a time</td>
+          <td>1 byte at a time</td>
+      </tr>
+      <tr>
+          <td><code>get_thing2</code></td>
+          <td>GCC</td>
+          <td>23</td>
+          <td>No</td>
+          <td>No (inlined)</td>
+          <td>1 byte at a time</td>
+          <td>2 bytes at a time</td>
+      </tr>
+      <tr>
+          <td><code>get_thing3</code></td>
+          <td>GCC</td>
+          <td>18</td>
+          <td>No</td>
+          <td>No (inlined)</td>
+          <td>2 bytes at a time</td>
+          <td>2 bytes at a time</td>
+      </tr>
+  </tbody>
+</table>
+<p>None of the three contestants were correct!</p>
+<p>Even without direct performance metrics here, <strong>get_thing3</strong> seems pretty undoubtedly superior to the others.</p>
+<p>On both compilers, it was the only version that both efficiently zeroed the struct and the string.</p>
+<p>We also saw no issue with RVO, or inlining. Our explicit <strong>memset</strong>s and <strong>memcpy</strong>s were always inlined, with the only failure occurring on the <strong>memset</strong> Clang added itself.</p>
+<p>In general this is a big win for compiler optimizations. This does not leave the results without optimization though, like instead of zeroing the struct two bytes at a time, you could have used <code>sw</code> to zero them four bytes at a time. C/C++ as far as I know guarantees structs to be 4 byte aligned. I am not sure why both GCC and Clang avoided this optimization.</p>
+<p>We also did not look into the branch optimizations in these functions. Speculative execution may prefer some of these implementations over some of the others; these optimizations would be best explored with actual performance testing on a chosen target platform.</p>
+<h3 id="what-can-be-learned">What can be learned<a hidden class="anchor" aria-hidden="true" href="#what-can-be-learned">#</a></h3>
+<p>Well I guess so. I think the lesson here is twofold. Avoid making micro-optimizations about what you think the compiler will do. When you do need to optimize, closely follow the actual compiler output and test on real hardware as opposed to playing a guessing game.</p>
+<p>From this experience in isolation, it also appears the compiler benefits from you being direct with what you want to do, not from babying each operation required to do it.</p>
+<h2 id="about-that-weird-memset">About That Weird Memset<a hidden class="anchor" aria-hidden="true" href="#about-that-weird-memset">#</a></h2>
+<p>If you&rsquo;re like me, you&rsquo;re wondering what had to go wrong inside of Clang to lead to that weird <strong>memset</strong> in <strong>get_thing1</strong>? Why would Clang add its own fixed <strong>memset</strong>, and then fail to inline it?</p>
+<p>Well I reached out to the LLVM community, and I will do my best to interpret what exactly happened here.</p>
+<p>The first thing they noted is that at some point the compiler will see too many zero sets, so instead of inlining it, it will just call <strong>memset</strong>, but why here, it&rsquo;s only clearing 13 bytes?</p>
+<p>Well as a test, apparently you can have it clear 12 bytes, instead of 13, and the issue goes away.</p>
+<div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-c" data-lang="c"><span style="display:flex;"><span><span style="color:#66d9ef">super_cool_thing_t</span> <span style="color:#a6e22e">get_thing1</span>(<span style="color:#66d9ef">const</span> <span style="color:#66d9ef">char</span><span style="color:#f92672">*</span> name, <span style="color:#66d9ef">bool</span> i_like_dogs) {
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">if</span>(i_like_dogs) {
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">return</span> <span style="color:#66d9ef">super_cool_thing_t</span> {
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>name: {<span style="color:#e6db74">&#39;B&#39;</span>, <span style="color:#e6db74">&#39;o&#39;</span>, <span style="color:#e6db74">&#39;b&#39;</span>, <span style="color:#e6db74">&#39;y&#39;</span>, <span style="color:#e6db74">&#39;\0&#39;</span>},
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>number_of_cats: <span style="color:#ae81ff">1</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>};
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>} <span style="color:#66d9ef">else</span> {
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#66d9ef">return</span> <span style="color:#66d9ef">super_cool_thing_t</span> {
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>name: {<span style="color:#e6db74">&#39;T&#39;</span>, <span style="color:#e6db74">&#39;i&#39;</span>, <span style="color:#e6db74">&#39;m&#39;</span>, <span style="color:#e6db74">&#39;y&#39;</span>, <span style="color:#e6db74">&#39;\0&#39;</span>},
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>number_of_cats: <span style="color:#ae81ff">32</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>};
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><div class="highlight"><pre tabindex="0" style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-asm" data-lang="asm"><span style="display:flex;"><span><span style="color:#a6e22e">get_thing1</span>(<span style="color:#66d9ef">char</span> <span style="color:#66d9ef">const</span>*, <span style="color:#66d9ef">bool</span>):
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">bnez</span> <span style="color:#66d9ef">a2</span>, <span style="color:#66d9ef">.LBB0_2</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">li</span> <span style="color:#66d9ef">a2</span>, <span style="color:#ae81ff">84</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">li</span> <span style="color:#66d9ef">a3</span>, <span style="color:#ae81ff">105</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">li</span> <span style="color:#66d9ef">a4</span>, <span style="color:#ae81ff">109</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">li</span> <span style="color:#66d9ef">a1</span>, <span style="color:#ae81ff">32</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">j</span> <span style="color:#66d9ef">.LBB0_3</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>.LBB0_2:
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">li</span> <span style="color:#66d9ef">a2</span>, <span style="color:#ae81ff">66</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">li</span> <span style="color:#66d9ef">a3</span>, <span style="color:#ae81ff">111</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">li</span> <span style="color:#66d9ef">a4</span>, <span style="color:#ae81ff">98</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">li</span> <span style="color:#66d9ef">a1</span>, <span style="color:#ae81ff">1</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>.LBB0_3:
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">li</span> <span style="color:#66d9ef">a5</span>, <span style="color:#ae81ff">121</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">sb</span> <span style="color:#66d9ef">a2</span>, <span style="color:#ae81ff">0</span>(<span style="color:#66d9ef">a0</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">sb</span> <span style="color:#66d9ef">a3</span>, <span style="color:#ae81ff">1</span>(<span style="color:#66d9ef">a0</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">sb</span> <span style="color:#66d9ef">a4</span>, <span style="color:#ae81ff">2</span>(<span style="color:#66d9ef">a0</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">sb</span> <span style="color:#66d9ef">a5</span>, <span style="color:#ae81ff">3</span>(<span style="color:#66d9ef">a0</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">sh</span> <span style="color:#66d9ef">zero</span>, <span style="color:#ae81ff">4</span>(<span style="color:#66d9ef">a0</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">sh</span> <span style="color:#66d9ef">zero</span>, <span style="color:#ae81ff">6</span>(<span style="color:#66d9ef">a0</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">sh</span> <span style="color:#66d9ef">zero</span>, <span style="color:#ae81ff">8</span>(<span style="color:#66d9ef">a0</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">sh</span> <span style="color:#66d9ef">zero</span>, <span style="color:#ae81ff">10</span>(<span style="color:#66d9ef">a0</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">sh</span> <span style="color:#66d9ef">zero</span>, <span style="color:#ae81ff">12</span>(<span style="color:#66d9ef">a0</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">sh</span> <span style="color:#66d9ef">zero</span>, <span style="color:#ae81ff">14</span>(<span style="color:#66d9ef">a0</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">sh</span> <span style="color:#66d9ef">a1</span>, <span style="color:#ae81ff">16</span>(<span style="color:#66d9ef">a0</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#a6e22e">ret</span>
+</span></span></code></pre></div><p>This now looks a lot like what we got from GCC.</p>
+<p>But I quickly found it seems to be due to it being an odd number of bytes. Where even numbers will down level to just store halfs while odd numbers end up invoking memset. Very interesting.</p>
+
+
+  </div>
+
+  <footer class="post-footer">
+    <ul class="post-tags">
+    </ul>
+<nav class="paginav">
+  <a class="next" href="https://rainbain.github.io/rainbain-blog/posts/diy-ocxo/">
+    <span class="title">Next »</span>
+    <span>DIY OCXO</span>
+  </a>
+</nav>
+
+  </footer>
+</article>
+    </main>
+    
+<footer class="footer">
+        <span>&copy; 2026 <a href="https://rainbain.github.io/rainbain-blog/"></a></span> · 
+
+    
+    
+    <span>
+        Powered by
+        <a href="https://gohugo.io/?utm_source=papermod" rel="noopener" target="_blank">Hugo</a> &
+        <a href="https://github.com/adityatelange/hugo-PaperMod/" rel="noopener" target="_blank">PaperMod</a>
+    </span>
+</footer>
+<a href="#top" id="top-link" class="top-link hidden" aria-label="go to top" title="Go to Top (Alt + G)" accesskey="g">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+        stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevrons-up">
+        <polyline points="17 11 12 6 7 11"></polyline>
+        <polyline points="17 18 12 13 7 18"></polyline>
+    </svg>
+</a>
+
+<script>
+    let menu = document.getElementById('menu');
+    if (menu) {
+        
+        const scrollPosition = localStorage.getItem("menu-scroll-position");
+        if (scrollPosition) {
+            menu.scrollLeft = parseInt(scrollPosition, 10);
+        }
+        
+        menu.onscroll = function () {
+            localStorage.setItem("menu-scroll-position", menu.scrollLeft);
+        }
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener("click", function (e) {
+            e.preventDefault();
+            var id = this.getAttribute("href").substr(1);
+            if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView({
+                    behavior: "smooth"
+                });
+            } else {
+                document.querySelector(`[id='${decodeURIComponent(id)}']`).scrollIntoView();
+            }
+            if (id === "top") {
+                history.replaceState(null, null, " ");
+            } else {
+                history.pushState(null, null, `#${id}`);
+            }
+        });
+    });
+
+</script>
+<script>
+    var toplink = document.getElementById("top-link");
+    window.onscroll = function () {
+        const scrollThreshold = window.innerHeight;
+        if (document.body.scrollTop > scrollThreshold || document.documentElement.scrollTop > scrollThreshold) {
+            toplink.classList.remove("hidden");
+        } else {
+            toplink.classList.add("hidden");
+        }
+    };
+
+</script>
+<script>
+    document.getElementById("theme-toggle").addEventListener("click", () => {
+        const html = document.querySelector("html");
+        if (html.dataset.theme === "dark") {
+            html.dataset.theme = 'light';
+            localStorage.setItem("pref-theme", 'light');
+        } else {
+            html.dataset.theme = 'dark';
+            localStorage.setItem("pref-theme", 'dark');
+        }
+    })
+
+</script>
+<script>
+    document.querySelectorAll('pre > code').forEach((codeblock) => {
+        const container = codeblock.parentNode.parentNode;
+
+        const copybutton = document.createElement('button');
+        copybutton.classList.add('copy-code');
+        copybutton.innerHTML = 'copy';
+
+        function copyingDone() {
+            copybutton.innerHTML = 'copied!';
+            setTimeout(() => {
+                copybutton.innerHTML = 'copy';
+            }, 2000);
+        }
+
+        copybutton.addEventListener('click', (cb) => {
+            if ('clipboard' in navigator) {
+                navigator.clipboard.writeText(codeblock.textContent);
+                copyingDone();
+                return;
+            }
+
+            const range = document.createRange();
+            range.selectNodeContents(codeblock);
+            const selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            try {
+                document.execCommand('copy');
+                copyingDone();
+            } catch (e) { };
+            selection.removeRange(range);
+        });
+
+        if (container.classList.contains("highlight")) {
+            container.appendChild(copybutton);
+        } else if (container.parentNode.firstChild == container) {
+            
+        } else if (codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.nodeName == "TABLE") {
+            
+            codeblock.parentNode.parentNode.parentNode.parentNode.parentNode.appendChild(copybutton);
+        } else {
+            
+            codeblock.parentNode.appendChild(copybutton);
+        }
+    });
+</script>
+</body>
+
+</html>
