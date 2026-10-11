@@ -3,8 +3,10 @@ title: GPU Rasterizer Optimizations, Shared Exponents
 date: 2026-10-11
 draft: false
 ---
+![Weird](weird.png)
+
 # GPU Rasterizer Optimizations, Shared Exponents
-![[thumbnail.png]]
+![Thumbnail](thumbnail.png)
 ## Project Context
 I have spent quite some time designing my own versions of GPUs and reverse engineering other GPU pipelines and hardware modules. Despite this, I have not yet posted on my GPU work here.
 
@@ -283,22 +285,22 @@ Results are good but not perfect.
 
 ### Big Triangles
 Big triangles come out perfect.
-![[content/posts/gpu_rasterizer_optimizations_shared_exponents/big.png]]
+![Big triangles](big.png)
 
 ### Small Triangles
 These also come out very good.
-![[content/posts/gpu_rasterizer_optimizations_shared_exponents/small.png]]
+![Small triangles](small.png)
 
 #### Weird And Small Triangles
 But certain small triangles seem to throw it off. You can see by the darkening here there was a good bit of precision loss. It's rather random when it does this. At Q0:8 I suspect there are cases where 1 bit of precision gets lost. A more reasonable Q0:16 would likely fix this.
-![[content/posts/gpu_rasterizer_optimizations_shared_exponents/weird.png]]
+![Weird and small triangles](weird.png)
 
 ### Skinny Triangles
 All good!
-![[skinny.png]]
+![Skinny triangles](skinny.png)
 
 ### Texturing Demo
-![[texturing.png]]
+![Texturing demo](texturing.png)
 For the most part good. We can see the Q0:8 format and my texture sampler don't get along fully right now in the software renderer though as evidenced by seam bleeding. But this is commonplace for low precision UVs.
 
 ## Common Pitfalls
