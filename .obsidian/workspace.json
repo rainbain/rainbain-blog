@@ -199,13 +199,13 @@
       "bases:Create new base": false
     }
   },
-  "active": "cf3fe209e028a483",
+  "active": "bd4c77aaa28393c7",
   "lastOpenFiles": [
     "docs/sitemap.xml",
-    "docs/posts/gpu_rasterizer_optimizations_shared_exponents/index.html",
     "docs/index.xml",
     "docs/index.html",
     "docs/404.html",
+    "docs/posts/gpu_rasterizer_optimizations_shared_exponents/index.html",
     "public/posts/gpu_rasterizer_optimizations_shared_exponents/index.html",
     "content/posts/guess-that-optimization-struct-initialization/index.md",
     "content/posts/guess-that-optimization-struct-initialization/guess-optimization.png",

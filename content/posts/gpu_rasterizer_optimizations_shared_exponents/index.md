@@ -3,8 +3,6 @@ title: GPU Rasterizer Optimizations, Shared Exponents
 date: 2026-10-11
 draft: false
 ---
-![Weird](weird.png)
-
 # GPU Rasterizer Optimizations, Shared Exponents
 ![Thumbnail](thumbnail.png)
 ## Project Context

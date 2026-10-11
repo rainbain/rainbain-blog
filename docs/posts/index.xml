@@ -13,8 +13,7 @@
       <link>https://rainbain.github.io/rainbain-blog/posts/gpu_rasterizer_optimizations_shared_exponents/</link>
       <pubDate>Sun, 11 Oct 2026 00:00:00 +0000</pubDate>
       <guid>https://rainbain.github.io/rainbain-blog/posts/gpu_rasterizer_optimizations_shared_exponents/</guid>
-      <description>&lt;p&gt;&lt;img alt=&#34;Weird&#34; loading=&#34;lazy&#34; src=&#34;https://rainbain.github.io/rainbain-blog/posts/gpu_rasterizer_optimizations_shared_exponents/weird.png&#34;&gt;&lt;/p&gt;
-&lt;h1 id=&#34;gpu-rasterizer-optimizations-shared-exponents&#34;&gt;GPU Rasterizer Optimizations, Shared Exponents&lt;/h1&gt;
+      <description>&lt;h1 id=&#34;gpu-rasterizer-optimizations-shared-exponents&#34;&gt;GPU Rasterizer Optimizations, Shared Exponents&lt;/h1&gt;
 &lt;p&gt;&lt;img alt=&#34;Thumbnail&#34; loading=&#34;lazy&#34; src=&#34;https://rainbain.github.io/rainbain-blog/posts/gpu_rasterizer_optimizations_shared_exponents/thumbnail.png&#34;&gt;&lt;/p&gt;
 &lt;h2 id=&#34;project-context&#34;&gt;Project Context&lt;/h2&gt;
 &lt;p&gt;I have spent quite some time designing my own versions of GPUs and reverse engineering other GPU pipelines and hardware modules. Despite this, I have not yet posted on my GPU work here.&lt;/p&gt;
