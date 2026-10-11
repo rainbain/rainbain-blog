@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "content/posts/gpu_rasterizer_optimizations_shared_exponents/gpu_rasterizer_optimizations_shared_exponents.md",
+                "file": "content/posts/gpu_rasterizer_optimizations_shared_exponents/index.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "gpu_rasterizer_optimizations_shared_exponents"
+              "title": "index"
             }
           },
           {
@@ -199,8 +199,17 @@
       "bases:Create new base": false
     }
   },
-  "active": "bd4c77aaa28393c7",
+  "active": "cf3fe209e028a483",
   "lastOpenFiles": [
+    "docs/sitemap.xml",
+    "docs/posts/gpu_rasterizer_optimizations_shared_exponents/index.html",
+    "docs/index.xml",
+    "docs/index.html",
+    "docs/404.html",
+    "public/posts/gpu_rasterizer_optimizations_shared_exponents/index.html",
+    "content/posts/guess-that-optimization-struct-initialization/index.md",
+    "content/posts/guess-that-optimization-struct-initialization/guess-optimization.png",
+    "content/posts/gpu_rasterizer_optimizations_shared_exponents/index.md",
     "content/posts/gpu_rasterizer_optimizations_shared_exponents/texturing.png",
     "content/posts/gpu_rasterizer_optimizations_shared_exponents/big.png",
     "content/posts/gpu_rasterizer_optimizations_shared_exponents/small.png",
@@ -210,20 +219,11 @@
     "small.png",
     "big.png",
     "content/posts/gpu_rasterizer_optimizations_shared_exponents/thumbnail.png",
-    "content/posts/guess-that-optimization-struct-initialization/index.md",
-    "content/posts/guess-that-optimization-struct-initialization/guess-optimization.png",
-    "content/posts/gpu_rasterizer_optimizations_shared_exponents/gpu_rasterizer_optimizations_shared_exponents.md",
     "content/posts/gpu_rasterizer_optimizations_shared_exponents",
     "docs/tags/index.xml",
     "docs/tags/index.html",
     "docs/tags",
-    "docs/sitemap.xml",
     "docs/posts/page/1/index.html",
-    "docs/posts/first-post/first-post/index.html",
-    "docs/posts/page/1",
-    "docs/posts/guess-that-optimization-struct-initialization/index.html",
-    "docs/posts/guess-that-optimization-struct-initialization/guess-optimization.png",
-    "docs/posts/first-post/first-post",
     "content/posts/diy-ocxo/index.md",
     "content/posts/first-post/First Post.md",
     "content/posts/Untitled.md",
